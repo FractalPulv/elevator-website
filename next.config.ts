@@ -9,9 +9,9 @@ const nextConfig: NextConfig = {
 		root: configDir,
 	},
 	images: {
-		// Allow the official Apple "Download on the App Store" SVG badge in /public.
-		dangerouslyAllowSVG: true,
-		contentDispositionType: "attachment",
+		// Every image in /public is already sized and compressed (screenshots are
+		// ~25 KB WebP), so serve them as-is instead of through the optimizer.
+		unoptimized: true,
 	},
 };
 
