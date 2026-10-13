@@ -1,11 +1,10 @@
 // Central site config. Swap these as the launch firms up.
 
-// Free Vercel subdomain for now — swap to a custom domain if one is bought later.
-export const DOMAIN = "elevatorscoreboard.vercel.app";
+export const DOMAIN = "elevator.lucapulv.com";
 
-export const CONTACT_EMAIL = "luca.gr8@gmail.com";
+export const CONTACT_EMAIL = "elevator@lucapulv.com";
 
-// Store links. TODO: replace "#" with the real listing URLs once live.
+// Store links. TODO: replace "#" with the real listing URL once the app is live.
 export const APP_STORE_URL = "#";
 export const PLAY_STORE_URL = "#";
 
