@@ -4,12 +4,12 @@ import { DOMAIN } from "@/app/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${DOMAIN}`),
-  title: "Elevator Scoreboard — Predict. Play. Score.",
+  title: "Elevator Scoreboard — Score Elevator without the pen and paper",
   description:
     "Elevator Scoreboard is a mobile scoreboard for the Italian trick-taking card game where only an exact prediction scores. The round count climbs from 1 to 10 cards and back, like an elevator.",
   icons: { icon: "/icon-dark.png", apple: "/icon-light.png" },
   openGraph: {
-    title: "Elevator Scoreboard — Predict. Play. Score.",
+    title: "Elevator Scoreboard — Score Elevator without the pen and paper",
     description:
       "A mobile scoreboard for the Italian trick-taking card game where only an exact prediction scores.",
     images: ["/icon-light.png"],

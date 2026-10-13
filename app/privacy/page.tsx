@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
       <header className="border-b border-[var(--line-soft)] px-5 py-5 sm:px-8">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/icon-light.png" alt="" width={28} height={28} className="rounded-[8px]" />
+            <Image src="/icon-256.png" alt="" width={28} height={28} className="rounded-[8px]" />
             <span className="wordmark text-lg">Elevator Scoreboard</span>
           </Link>
           <Link href="/" className="nav-link text-sm">
