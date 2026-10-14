@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { DOMAIN } from "@/app/lib/site";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${DOMAIN}`),
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <div className="bg-aura" aria-hidden="true" />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
