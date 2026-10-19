@@ -66,7 +66,12 @@ export default function Support() {
 
       <footer className="border-t border-[var(--line-soft)] px-5 py-8 text-sm text-[var(--text-3)] sm:px-8">
         <div className="mx-auto flex w-full max-w-3xl justify-between">
-          <p>© {new Date().getFullYear()} Elevator Scoreboard.</p>
+          <p>
+            © {new Date().getFullYear()} Elevator Scoreboard · Made by{" "}
+            <a href="https://lucapulv.com" className="nav-link !text-sm">
+              Luca Pulvirenti
+            </a>
+          </p>
           <Link href="/privacy" className="nav-link !text-sm">
             Privacy
           </Link>

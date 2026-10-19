@@ -106,6 +106,25 @@ export default function PrivacyPolicy() {
           </p>
         </Section>
 
+        <Section title="This Website">
+          <p>
+            The app has no analytics, but this website does. To see how it&apos;s used, it runs Vercel
+            Analytics, Vercel Speed Insights and PostHog (hosted in the EU). PostHog may record anonymised
+            session replays of how you move through the site, including JavaScript errors and page speed;
+            anything you type into a form is masked. Some replays may be summarised by PostHog&apos;s AI tools,
+            which send them to PostHog&apos;s AI subprocessors.
+          </p>
+          <p>
+            No cookies or local storage are used for this, and nothing is used to identify you across sites.
+            If you arrive from lucapulv.com, a random visit ID is passed along in the link so both sites
+            count as one visit. See also the{" "}
+            <a href="https://lucapulv.com/privacy" className="accent-text underline">
+              lucapulv.com privacy note
+            </a>
+            .
+          </p>
+        </Section>
+
         <Section title="Children">
           <p>
             Elevator Scoreboard is not directed at children under 13, and we do not knowingly collect personal
@@ -127,7 +146,12 @@ export default function PrivacyPolicy() {
 
       <footer className="border-t border-[var(--line-soft)] px-5 py-8 text-sm text-[var(--text-3)] sm:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          <p>© {new Date().getFullYear()} Elevator Scoreboard.</p>
+          <p>
+            © {new Date().getFullYear()} Elevator Scoreboard · Made by{" "}
+            <a href="https://lucapulv.com" className="nav-link !text-sm">
+              Luca Pulvirenti
+            </a>
+          </p>
         </div>
       </footer>
     </div>

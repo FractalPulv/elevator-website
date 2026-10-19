@@ -9,4 +9,4 @@ export const APP_STORE_URL = "#";
 export const PLAY_STORE_URL = "#";
 
 // Last meaningful update to the privacy policy.
-export const PRIVACY_UPDATED = "July 17, 2026";
+export const PRIVACY_UPDATED = "October 19, 2026";
