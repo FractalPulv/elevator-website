@@ -64,8 +64,33 @@ export default function PrivacyPolicy() {
             payment card details.
           </p>
           <p>
-            <strong className="text-[var(--text)]">No analytics.</strong> The app does not include behavioral
-            or advertising analytics.
+            <strong className="text-[var(--text)]">Usage analytics.</strong> The app records which screens you
+            open and a few game milestones (a game started, a round scored, a game finished), with details
+            such as the number of players, the card deck, and the <strong className="text-[var(--text)]">names
+            of the players</strong> in the game and who won. Player names often belong to friends at your
+            table, so please only add names they&apos;re happy to share. Events are tied to a random ID created
+            on install, not to an account. Player photos, spectator codes and anything you type are never
+            included, and nothing is used for advertising.
+          </p>
+          <p>
+            <strong className="text-[var(--text)]">Session recordings.</strong> To find and fix bugs, the app may
+            record how you move through its screens (a visual replay, plus technical logs and network timing).
+            Text on screen, including player names, can appear in these recordings; images such as player photos
+            and the system photo picker are hidden.
+          </p>
+          <p>
+            <strong className="text-[var(--text)]">Your choice.</strong> You can turn off usage analytics and
+            session recordings at any time in the app under Settings &rsaquo; Privacy &rsaquo; Share usage data.
+          </p>
+          <p>
+            <strong className="text-[var(--text)]">Performance measurements.</strong> The app measures how
+            long it takes to start and to open each screen, so we can keep it fast.
+          </p>
+          <p>
+            <strong className="text-[var(--text)]">Device information.</strong> With the analytics and
+            performance data, we receive basic technical details: device model, operating system and app
+            version, language and time zone. Our analytics provider also sees your IP address when the data
+            arrives.
           </p>
         </Section>
 
@@ -74,6 +99,7 @@ export default function PrivacyPolicy() {
           <ul className="list-disc space-y-2 pl-6">
             <li>Run the game, save your scores, and sync spectator rooms.</li>
             <li>Diagnose crashes and fix bugs.</li>
+            <li>Understand, in aggregate, which features are used and how fast the app is.</li>
             <li>Unlock and maintain Elevator Scoreboard Pro for accounts that purchased it.</li>
           </ul>
           <p>We do not sell your data or use it for advertising.</p>
@@ -91,6 +117,14 @@ export default function PrivacyPolicy() {
               scoreboard data you create, including spectator rooms.
             </li>
             <li>
+              <strong className="text-[var(--text)]">PostHog</strong> (EU Cloud, Frankfurt) — usage analytics and
+              session recordings, as described above.
+            </li>
+            <li>
+              <strong className="text-[var(--text)]">Expo</strong> (EAS Observe) — app start-up and screen
+              load performance.
+            </li>
+            <li>
               <strong className="text-[var(--text)]">RevenueCat</strong> — manages the Elevator Scoreboard Pro purchase
               and subscription status.
             </li>
@@ -102,13 +136,14 @@ export default function PrivacyPolicy() {
           <p>
             Game data lives on your device and in our backend for as long as you keep using the app. You can
             remove players, matches, and rooms from within the app. Crash reports are retained only as long as
-            needed to investigate and resolve issues.
+            needed to investigate and resolve issues. Analytics events and session recordings are kept only
+            as long as they help improve the app, within each provider&apos;s retention limits.
           </p>
         </Section>
 
         <Section title="This Website">
           <p>
-            The app has no analytics, but this website does. To see how it&apos;s used, it runs Vercel
+            Separately from the app, this website also measures how it&apos;s used. It runs Vercel
             Analytics, Vercel Speed Insights and PostHog (hosted in the EU). PostHog may record anonymised
             session replays of how you move through the site, including JavaScript errors and page speed;
             anything you type into a form is masked. Some replays may be summarised by PostHog&apos;s AI tools,
