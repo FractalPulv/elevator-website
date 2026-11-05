@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type PointerEvent } from "react";
+import { useRef, type PointerEvent, type ReactNode } from "react";
 
 type Tilt = "left" | "right" | "none";
 
 type PhoneMockupProps = {
-  /** Real screenshot path under /public, e.g. "/screenshots/score-dark.webp". */
-  src: string;
-  alt: string;
+  /** Real screenshot path under /public, e.g. "/screenshots/predict-dark.jpg". */
+  src?: string;
+  alt?: string;
+  /** Anything else on the screen instead of a screenshot (a screen recording, a rotating view). */
+  children?: ReactNode;
   /** Which way the phone turns in 3D. "left" faces the screen towards the left. */
   tilt?: Tilt;
   glow?: boolean;
@@ -35,6 +37,7 @@ export function PhoneMockup({
   width = "16rem",
   priority,
   className,
+  children,
 }: PhoneMockupProps) {
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -84,13 +87,9 @@ export function PhoneMockup({
           <span className="phone__btn phone__btn--power" />
           <div className="phone__screen">
             <span className="phone__island" aria-hidden="true" />
-            <Image
-              className="phone__img"
-              src={src}
-              alt={alt}
-              fill
-              priority={priority}
-            />
+            {children ?? (
+              <Image className="phone__img" src={src ?? ""} alt={alt ?? ""} fill priority={priority} />
+            )}
             <span className="phone__glare" aria-hidden="true" />
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { decks, useDeck } from "@/app/components/Deck";
 
 // Seat order and colours match the app screenshots: Luca deals from the front seat.
 const players = [
@@ -12,15 +13,6 @@ const players = [
   { name: "Paolo", color: "#06b6d4" },
 ];
 
-// The trick on the felt: each player's card, tossed down in front of their seat.
-const played = [
-  "/cards/01_coins_ace.webp",
-  "/cards/20_cups_king.webp",
-  "/cards/39_swords_knight.webp",
-  "/cards/30_clubs_king.webp",
-  "/cards/31_swords_ace.webp",
-  "/cards/19_cups_knight.webp",
-];
 // Fixed "random" tilt and nudge per card, so it looks thrown but never jitters between renders.
 const toss = [
   { r: -17, dx: 0.4, dy: -0.3 },
@@ -56,6 +48,9 @@ function seat(i: number, n: number) {
 }
 
 export function TableSeats() {
+  const { deck } = useDeck();
+  const trick = decks[deck].trick; // each player's card on the felt, from the page's deck
+  const faceUp = [...decks[deck].hand, ...trick]; // the near player's hand, seen from behind
   const [count, setCount] = useState(4);
   const [round, setRound] = useState(4);
   const [paused, setPaused] = useState(false);
@@ -84,28 +79,52 @@ export function TableSeats() {
 
   return (
     <div className="flex h-full flex-col" onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
-      <div ref={sceneRef} className="table-scene" aria-label={`${count} players, ${cards} cards each`} role="img">
+      <div ref={sceneRef} className="table-scene" data-deck={deck} aria-label={`${count} players, ${cards} cards each`} role="img">
         <div className="table-scene__felt" />
         {players.slice(0, count).map((p, i) => {
           const s = seat(i, count);
           const t = toss[i];
           return (
             <span
-              key={p.name}
-              className="table-card table-card--played"
+              key={`${p.name}-${deck}`}
+              className={`table-card table-card--played${deck === "poker" ? " table-card--poker" : ""}`}
               style={{
                 left: `calc(${50 + s.x * 15}% + ${t.dx}rem)`,
                 top: `calc(${50 + s.y * 14}% + ${t.dy}rem)`,
-                backgroundImage: `url(${played[i]})`,
+                backgroundImage: `url(${trick[i]})`,
                 transform: `translate(-50%, -50%) rotate(${t.r}deg)`,
               }}
             />
           );
         })}
 
+        {/* the deck, by the dealer's seat */}
+        <span className="table-deck card-back" aria-hidden="true" />
+
+        {/* each new round is dealt: one card flies from the deck to every seat */}
+        {visible &&
+          players.slice(0, count).map((p, i) => {
+            const s = seat(i, count);
+            return (
+              <span
+                key={`deal-${r}-${count}-${p.name}`}
+                className={`deal-card card-back${deck === "poker" ? " table-card--poker" : ""}`}
+                aria-hidden="true"
+                style={{
+                  ["--tx" as string]: `${50 + s.x * 40}%`,
+                  ["--ty" as string]: `${50 + s.y * 36}%`,
+                  animationDelay: `${i * 90}ms`,
+                }}
+              />
+            );
+          })}
+
         {players.slice(0, count).map((p, i) => {
           const s = seat(i, count);
           const scale = 0.9 + s.depth * 0.35;
+          // the near seat has their back to us, so we look over their shoulder at the cards
+          const near = s.y >= 0.9;
+          const spread = Math.min(near ? 11 : 9, (near ? 80 : 60) / cards);
           return (
             <div
               key={p.name}
@@ -120,23 +139,30 @@ export function TableSeats() {
             >
               <span className="pawn__head" />
               <span className="pawn__body" />
-              {/* the hand, held up and fanned, backs out — everyone except the player
-                  sitting right in front, whose back is to the camera */}
-              {s.y < 0.9 && (
-              <span className="pawn__hand" aria-hidden="true">
+              {/* the hand, held up and fanned towards its owner: side seats turn it in
+                  towards the middle of the table, so we see the backs at an angle */}
+              <span
+                className={`pawn__hand${near ? " pawn__hand--near" : ""}`}
+                aria-hidden="true"
+                style={near ? undefined : { transform: `perspective(170px) rotateX(16deg) rotateY(${(-s.x * 52).toFixed(1)}deg)` }}
+              >
                 {Array.from({ length: cards }).map((_, c) => {
-                  const spread = Math.min(9, 60 / cards);
                   const angle = (c - (cards - 1) / 2) * spread;
-                  return (
+                  const style = {
+                    transform: `translateX(-50%) rotate(${angle}deg)`,
+                    animationDelay: `${i * 90 + 380}ms`,
+                  };
+                  return near ? (
                     <span
                       key={c}
-                      className="table-card table-card--held"
-                      style={{ transform: `translateX(-50%) rotate(${angle}deg)` }}
+                      className={`table-card table-card--held table-card--face${deck === "poker" ? " table-card--poker" : ""}`}
+                      style={{ ...style, backgroundImage: `url(${faceUp[c % faceUp.length]})` }}
                     />
+                  ) : (
+                    <span key={c} className="table-card table-card--held card-back" style={style} />
                   );
                 })}
               </span>
-              )}
               <span className="pawn__name">{p.name}</span>
             </div>
           );

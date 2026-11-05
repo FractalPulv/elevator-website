@@ -1,50 +1,83 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CardFan } from "@/app/components/CardFan";
+import { DeckCards, DeckProvider } from "@/app/components/Deck";
 import { ChartIcon, ListIcon, TableIcon, TrophyIcon } from "@/app/components/Icons";
-import { ToggleShot } from "@/app/components/ToggleShot";
 import { PhoneMockup } from "@/app/components/PhoneMockup";
+import { PhoneVideo, type Cue } from "@/app/components/PhoneVideo";
 import { Reveal } from "@/app/components/Reveal";
+import { RotateShot } from "@/app/components/RotateShot";
+import { ScoringModes } from "@/app/components/ScoringModes";
+import { StepClips, type Step } from "@/app/components/StepClips";
 import { StoreButtons } from "@/app/components/StoreButtons";
 import { TableSeats } from "@/app/components/TableSeats";
-import {
-  FrenchClub,
-  FrenchDiamond,
-  FrenchHeart,
-  FrenchSpade,
-  ItalianBat,
-  ItalianCoin,
-  ItalianCup,
-  ItalianSword,
-} from "@/app/components/SuitIcons";
+import { ToggleShot } from "@/app/components/ToggleShot";
 
 const navItems = [
+  { href: "#the-game", label: "The game" },
   { href: "#how-it-works", label: "How it works" },
   { href: "#features", label: "Features" },
   { href: "#pro", label: "Pro" },
 ];
 
-const steps = [
+// Player colours, as in the app.
+const C = { Giulia: "#3b82f6", Marco: "#f97316", Sofia: "#22c55e", Luca: "#d946ef" };
+const say = (name: keyof typeof C, text: string, from: number, to: number, side: Cue["side"], y: number): Cue => ({
+  name,
+  color: C[name],
+  text,
+  from,
+  to,
+  side,
+  y,
+});
+
+// One round of one game, recorded in the app (round 5, five cards each). The bubbles are
+// what's said at the table, timed to the recording: someone calls, the phone records it.
+// Only the calls are spoken; tricks get tapped in quietly as they're won.
+const steps: Step[] = [
   {
     title: "Predict",
-    body: "Everyone calls how many tricks they'll take. Tap to set the call, lock it in, pass the phone along.",
-    src: "/screenshots/predict-dark.jpg",
-    alt: "Prediction screen: each player locks in their call",
-    tilt: "right" as const,
+    body: "Everyone calls how many tricks they'll take. Tap in the call, lock it, pass the phone along.",
+    src: "/clips/predict.mp4",
+    label: "Giulia's call of 2 is entered and locked",
+    tilt: "right",
+    cues: [say("Giulia", "Two.", 0.2, 3.4, "left", 0.25)],
   },
   {
     title: "The last call",
-    body: "The dealer can't make the calls add up to the cards in play, so someone always misses. The app shows which number is off limits.",
-    src: "/screenshots/lastcall-dark.jpg",
-    alt: "The dealer is told which call they can't make",
-    tilt: "none" as const,
+    body: "Whoever calls last can't make the calls add up to the cards dealt, so someone always misses. The app shows the number that's off limits.",
+    src: "/clips/lastcall.mp4",
+    label: "Sofia calls 0. Luca, calling last, is told he can't call 2 and calls 1",
+    tilt: "none",
+    cues: [
+      say("Sofia", "Zero.", 0.2, 1.8, "left", 0.46),
+      { ...say("Luca", "Two\u2026", 2.2, 5.6, "right", 0.58), then: { at: 3.4, text: "Oh. One, then." } },
+    ],
   },
   {
     title: "Score",
-    body: "Enter the tricks each player took. Hit your call exactly and you score. Miss by one and you get nothing.",
-    src: "/screenshots/score-dark.jpg",
-    alt: "Scoring screen showing points won this round",
-    tilt: "left" as const,
+    body: "Tap in each trick as it's won. Hit your call exactly and you score. Miss, and you don't.",
+    src: "/clips/score.mp4",
+    label: "Tricks are entered and the round's points appear",
+    tilt: "left",
+    cues: [],
+  },
+];
+
+// The card game itself, before any app: who you need, what to learn, how it goes.
+const beats = [
+  {
+    title: "Get friends",
+    body: "Three to six players around one table, and one deck: a 40-card Italian deck or an ordinary poker deck.",
+  },
+  {
+    title: "Learn the rules",
+    body: "Every round deals one more card than the last, up to the top floor and back down. Call your tricks, then play them. The Rules tab walks you through it.",
+  },
+  {
+    title: "Play",
+    body: "One phone keeps score for everyone. Seat the players the way you're sitting and the app tracks who deals and who calls first.",
   },
 ];
 
@@ -62,41 +95,6 @@ const landscapeShots = [
   },
 ];
 
-const shotFeatures = [
-  {
-    title: "Pick up where you left off",
-    body: "Close the app mid-game. The scoreboard is waiting on the home screen.",
-    src: "/screenshots/home-light.webp",
-  },
-  {
-    title: "English and Italian",
-    body: "The whole app, rules included, in both languages.",
-    toggle: {
-      label: "App language",
-      options: [
-        { label: "English", src: "/screenshots/predict-dark.jpg", alt: "Calling screen in English" },
-        { label: "Italiano", src: "/screenshots/predict-italian.jpg", alt: "Calling screen in Italian" },
-      ],
-    },
-  },
-  {
-    title: "Portrait or landscape",
-    body: "Every screen works both ways. Upright you get the podium; on its side, the full table.",
-    toggle: {
-      label: "Orientation",
-      options: [
-        { label: "Portrait", src: "/screenshots/chart-portrait.jpg", alt: "Stats in portrait: chart and podium" },
-        {
-          label: "Landscape",
-          src: "/screenshots/landscape-table.webp",
-          alt: "Stats in landscape: the full score table",
-          landscape: true,
-        },
-      ],
-    },
-  },
-];
-
 const chartPoints = [
   { Icon: ChartIcon, label: "A live chart of every round" },
   { Icon: TableIcon, label: "The full score table, round by round" },
@@ -106,8 +104,8 @@ const chartPoints = [
 
 const proItems = [
   "5 and 6 player games",
-  "Live scoreboard sync with a room code",
-  "Scores on the Lock Screen while you watch",
+  "The live game on every player's phone",
+  "Scores on the Lock Screen while you play",
   "One-time purchase, no subscription",
 ];
 
@@ -146,6 +144,7 @@ export default function Home() {
         </div>
       </header>
 
+      <DeckProvider>
       <main className="relative z-10 flex-1">
         {/* Hero */}
         <section id="hero" className="scroll-mt-28 px-5 pb-20 pt-14 sm:px-8 lg:pb-28 lg:pt-20">
@@ -168,7 +167,7 @@ export default function Home() {
 
             <Reveal delay={0.1} className="relative flex h-[30rem] items-center justify-center sm:h-[36rem]">
               <div className="absolute left-[8%] top-0 z-10 hidden sm:block">
-                <PhoneMockup src="/screenshots/home-light.webp" alt="Games screen in light mode" tilt="left" width="14rem" />
+                <PhoneMockup src="/screenshots/home-light.jpg" alt="Games screen in light mode" tilt="left" width="14rem" />
               </div>
               {/* the hand just dealt, peeking out from under the phones */}
               <CardFan className="absolute bottom-[14%] right-[-2%] z-0 hidden rotate-[18deg] sm:block" />
@@ -186,6 +185,32 @@ export default function Home() {
           </div>
         </section>
 
+        {/* The card game itself: people, a deck, a table */}
+        <section id="the-game" className="scroll-mt-28 px-5 py-20 sm:px-8">
+          <div className="mx-auto grid w-full max-w-5xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
+            <Reveal>
+              <p className="eyebrow">First, the card game</p>
+              <h2 className="display mt-5 text-4xl sm:text-5xl">Friends, a deck and a table</h2>
+              <p className="lede mt-6 max-w-md">
+                Elevator is played face to face, with real cards. It takes a round to learn and a whole evening to
+                stop playing.
+              </p>
+              <ol className="mt-9 grid gap-6">
+                {beats.map((b, i) => (
+                  <li key={b.title} className="beat">
+                    <span className="beat__num">0{i + 1}</span>
+                    <span className="beat__title">{b.title}</span>
+                    <span className="beat__body">{b.body}</span>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
+            <Reveal delay={0.1} className="tile !p-6 sm:!p-8">
+              <TableSeats />
+            </Reveal>
+          </div>
+        </section>
+
         {/* How a round works */}
         <section id="how-it-works" className="scroll-mt-28 px-5 py-20 sm:px-8">
           <div className="mx-auto w-full max-w-5xl">
@@ -194,18 +219,9 @@ export default function Home() {
               <h2 className="display mt-5 text-4xl sm:text-5xl">Only an exact call scores</h2>
             </Reveal>
 
-            <div className="mt-16 grid gap-16 md:grid-cols-3 md:gap-8">
-              {steps.map((step, i) => (
-                <Reveal key={step.title} delay={i * 0.08} className="flex flex-col items-center text-center">
-                  <PhoneMockup src={step.src} alt={step.alt} tilt={step.tilt} width="13.5rem" />
-                  <div className="mt-10 flex items-center gap-3">
-                    <span className="step-num">{i + 1}</span>
-                    <h3 className="text-xl font-semibold tracking-[-0.02em]">{step.title}</h3>
-                  </div>
-                  <p className="mt-3 max-w-[18rem] leading-6 text-[var(--text-2)]">{step.body}</p>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal delay={0.05}>
+              <StepClips steps={steps} />
+            </Reveal>
           </div>
         </section>
 
@@ -247,27 +263,14 @@ export default function Home() {
             </Reveal>
 
             <div className="mt-12 grid gap-4 md:grid-cols-3">
-              {/* The table — this is a companion to a game played with friends */}
-              <Reveal className="tile grid gap-8 md:col-span-3 md:grid-cols-[0.8fr_1.2fr] md:items-center md:!p-10">
-                <div>
-                  <h3 className="tile__title !text-2xl">Made for the table</h3>
-                  <p className="tile__body">
-                    Elevator is played face to face, with a real deck. Every round deals one more card than the
-                    last, up to the top floor and back down again, so the more players, the shorter the ride.
-                  </p>
-                  <p className="tile__body">
-                    One phone keeps score for everyone. Seat the players the way you&rsquo;re sitting and the app
-                    tracks who deals and who calls first.
-                  </p>
-                </div>
-                <TableSeats />
-              </Reveal>
-
-              {/* Chart */}
+              {/* Chart — a real recording: hold a finger on it and the podium follows */}
               <Reveal className="tile flex flex-col gap-8 sm:flex-row md:col-span-2 md:row-span-2 md:min-h-[36rem]">
                 <div className="flex flex-col sm:w-1/2">
                   <h3 className="tile__title">See the game unfold</h3>
-                  <p className="tile__body">Who&rsquo;s climbing, who&rsquo;s slipping, and by how much.</p>
+                  <p className="tile__body">
+                    Who&rsquo;s climbing, who&rsquo;s slipping, and by how much. Hold a finger on the chart to
+                    see the standings after any round.
+                  </p>
                   <ul className="mt-8 grid gap-4 sm:mt-auto">
                     {chartPoints.map(({ Icon, label }) => (
                       <li key={label} className="stat-row">
@@ -279,10 +282,11 @@ export default function Home() {
                     ))}
                   </ul>
                 </div>
-                <div className="pointer-events-none relative -mb-36 flex justify-center sm:-mb-28 sm:w-1/2 sm:items-end">
-                  <PhoneMockup
-                    src="/screenshots/chart-dark.webp"
-                    alt="Score chart and podium after five rounds"
+                <div className="relative -mb-36 flex justify-center sm:-mb-28 sm:w-1/2 sm:items-end">
+                  <PhoneVideo
+                    src="/clips/chart.mp4"
+                    poster="/clips/chart.jpg"
+                    label="A finger runs along the score chart and the podium re-sorts for each round"
                     tilt="left"
                     width="clamp(13rem, 24vw, 16.5rem)"
                   />
@@ -294,53 +298,83 @@ export default function Home() {
                 <h3 className="tile__title">Light or dark</h3>
                 <p className="tile__body">Follows your phone, or pick one.</p>
                 <div className="pointer-events-none absolute -bottom-40 left-1/2 flex -translate-x-1/2 gap-3">
-                  <PhoneMockup src="/screenshots/home-light.webp" alt="Light mode" width="8.5rem" />
-                  <PhoneMockup src="/screenshots/home-dark.webp" alt="Dark mode" width="8.5rem" />
+                  <PhoneMockup src="/screenshots/home-light.jpg" alt="Light mode" width="8.5rem" />
+                  <PhoneMockup src="/screenshots/home-dark.jpg" alt="Dark mode" width="8.5rem" />
                 </div>
               </Reveal>
 
-              {/* Decks */}
+              {/* Decks — the switch drives the whole page: hero hand, table, this tile */}
               <Reveal delay={0.1} className="tile flex min-h-[18rem] flex-col">
                 <h3 className="tile__title">Your deck</h3>
                 <p className="tile__body">
-                  The 40-card Italian deck, or a regular deck with a few cards taken out.
+                  The 40-card Italian deck, or a poker deck with the J, Q and K out (or the 8, 9 and 10, or all
+                  52 for a longer game).
                 </p>
-                <div className="mt-auto grid grid-cols-4 gap-3 pt-8">
-                  {[
-                    { Icon: ItalianSword, color: "var(--suit-sword)" },
-                    { Icon: ItalianCup, color: "var(--suit-cup)" },
-                    { Icon: ItalianBat, color: "var(--suit-bat)" },
-                    { Icon: ItalianCoin, color: "var(--suit-coin)" },
-                    { Icon: FrenchSpade, color: "var(--text-2)" },
-                    { Icon: FrenchHeart, color: "var(--suit-cup)" },
-                    { Icon: FrenchClub, color: "var(--text-2)" },
-                    { Icon: FrenchDiamond, color: "var(--suit-cup)" },
-                  ].map(({ Icon, color }, i) => (
-                    <span
-                      key={i}
-                      className="grid aspect-square place-items-center rounded-xl bg-[var(--surface-2)]"
-                      style={{ color }}
-                    >
-                      <Icon size={22} />
-                    </span>
-                  ))}
+                <DeckCards />
+              </Reveal>
+
+              {/* Scoring modes */}
+              <Reveal className="tile flex flex-col gap-6 md:col-span-2 md:!p-8">
+                <div>
+                  <h3 className="tile__title">Casual or competitive</h3>
+                  <p className="tile__body !max-w-md">
+                    An exact call scores the same either way. In casual, a miss scores nothing. In competitive,
+                    it costs you.
+                  </p>
+                </div>
+                <ScoringModes />
+              </Reveal>
+
+              {/* Pick up where you left off */}
+              <Reveal delay={0.05} className="tile flex min-h-[24rem] flex-col !p-6">
+                <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">Pick up where you left off</h3>
+                <p className="mt-1.5 leading-6 text-[var(--text-2)]">
+                  Close the app mid-game. The scoreboard is waiting on the home screen.
+                </p>
+                <div className="pointer-events-none absolute inset-x-8 top-[9.5rem]">
+                  <PhoneMockup src="/screenshots/home-dark.jpg" alt="Games screen: continue the game in round 6" width="100%" />
                 </div>
               </Reveal>
 
-              {shotFeatures.map((f, i) => (
-                <Reveal key={f.title} delay={0.05 * i} className="tile flex min-h-[22rem] flex-col !p-6">
-                  <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">{f.title}</h3>
-                  <p className="mt-1.5 leading-6 text-[var(--text-2)]">{f.body}</p>
-                  {f.toggle ? (
-                    <ToggleShot label={f.toggle.label} options={f.toggle.options} />
-                  ) : (
-                    // the home screen peeks up from the bottom edge; its top is what matters
-                    <div className="pointer-events-none absolute -bottom-56 left-1/2 -translate-x-1/2">
-                      <PhoneMockup src={f.src ?? ""} alt={f.title} width="11rem" />
-                    </div>
-                  )}
-                </Reveal>
-              ))}
+              {/* English and Italian — the same moment in both, big enough to read */}
+              <Reveal className="tile flex min-h-[30rem] flex-col !p-6">
+                <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">English and Italian</h3>
+                <p className="mt-1.5 leading-6 text-[var(--text-2)]">The whole app, rules included, in both languages.</p>
+                <ToggleShot
+                  peek
+                  label="App language"
+                  options={[
+                    { label: "English", src: "/screenshots/predict-dark.jpg", alt: "Calling screen in English" },
+                    { label: "Italiano", src: "/screenshots/predict-italian.jpg", alt: "Calling screen in Italian" },
+                  ]}
+                />
+              </Reveal>
+
+              {/* Portrait or landscape — the phone turns, the screen re-lays out */}
+              <Reveal delay={0.05} className="tile flex min-h-[30rem] flex-col !p-6">
+                <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">Portrait or landscape</h3>
+                <p className="mt-1.5 leading-6 text-[var(--text-2)]">
+                  Every screen works both ways. Turn the phone and calling becomes one big, focused view.
+                </p>
+                <div className="mt-auto pt-4">
+                  <RotateShot
+                    portrait={{ src: "/screenshots/predict-dark.jpg", alt: "Calling screen, upright" }}
+                    landscape={{ src: "/screenshots/landscape-predict.webp", alt: "The same calls on its side, one player at a time" }}
+                  />
+                </div>
+              </Reveal>
+
+              {/* Rules */}
+              <Reveal delay={0.1} className="tile flex min-h-[30rem] flex-col !p-6">
+                <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">The rules, built in</h3>
+                <p className="mt-1.5 leading-6 text-[var(--text-2)]">
+                  New to Elevator? The Rules tab covers dealing, calling, tricks and scoring, with examples you
+                  can tap through.
+                </p>
+                <div className="pointer-events-none absolute inset-x-6 top-[12.5rem]">
+                  <PhoneMockup src="/screenshots/rules-predict.jpg" alt="Rules tab: the last call, explained" width="100%" />
+                </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -354,7 +388,7 @@ export default function Home() {
                 <h2 className="display mt-5 text-4xl sm:text-5xl">Bigger tables. Live scores.</h2>
                 <p className="lede mt-6 max-w-md">
                   Scoring, match history and stats are free for everyone. Pro is a one-time unlock for bigger
-                  games and for friends who want to follow along.
+                  games and for a table where everyone can see the score.
                 </p>
               </Reveal>
               <Reveal delay={0.05}>
@@ -370,22 +404,33 @@ export default function Home() {
             </div>
 
             <div className="mt-12 grid gap-4 md:grid-cols-3">
-              {/* Live spectating — wide, phone beside the copy */}
-              <Reveal className="tile grid items-center gap-8 sm:grid-cols-[0.8fr_1.2fr] md:col-span-2 md:!p-8">
+              {/* Live scores at the table — a recording of joining with a room code */}
+              <Reveal className="tile grid items-center gap-8 sm:grid-cols-[1fr_1fr] md:col-span-2 md:!p-8">
                 <div>
-                  <h3 className="tile__title">Watch from anywhere</h3>
+                  <h3 className="tile__title">The score on every phone</h3>
                   <p className="tile__body">
-                    Share a four-letter room code. Friends follow every call and every point live, on their own
-                    phone, from the next room or the next city.
+                    Everyone wants to check the score and the chart, and that used to mean passing the one phone
+                    around the table. Share a four-letter room code and each player follows every call and every
+                    point live on their own phone.
                   </p>
                 </div>
                 <div className="flex justify-center">
-                  <PhoneMockup
-                    src="/screenshots/spectator.webp"
-                    alt="Live spectator view of a game in progress"
-                    landscape
-                    tilt="left"
-                    width="min(100%, 24rem)"
+                  <PhoneVideo
+                    src="/clips/spectate.mp4"
+                    poster="/clips/spectate.jpg"
+                    label="Entering room code NYYA opens the live game"
+                    cues={[
+                      {
+                        name: "Luca",
+                        color: "#d946ef",
+                        text: "The code's NYYA.",
+                        from: 1.1,
+                        to: 5.2,
+                        side: "left",
+                        y: 0.36,
+                      },
+                    ]}
+                    width="12rem"
                   />
                 </div>
               </Reveal>
@@ -393,7 +438,7 @@ export default function Home() {
               {/* Live Activity — a crop of the real Lock Screen capture */}
               <Reveal delay={0.05} className="tile flex flex-col !p-6">
                 <h3 className="tile__title">On the Lock Screen</h3>
-                <p className="tile__body">Spectators get a Live Activity: the leader, the scores and the next round.</p>
+                <p className="tile__body">Everyone following gets a Live Activity: the leader, the scores and the next round.</p>
                 <div className="mt-auto pt-6">
                   <Image
                     src="/screenshots/live-activity-crop.webp"
@@ -445,6 +490,7 @@ export default function Home() {
           </Reveal>
         </section>
       </main>
+      </DeckProvider>
 
       <footer className="relative z-10 px-5 py-10 text-sm text-[var(--text-3)] sm:px-8">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
