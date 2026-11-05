@@ -1328,3 +1328,26 @@ button:focus-visible {
   line-height: 1.5rem;
   text-wrap: pretty;
 }
+
+/* ---- English / Italian: the same row in both languages, zoomed in ---- */
+.lang-strip {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.lang-strip__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.1rem;
+  border: 1px solid var(--line);
+}
+
+.lang-strip__label {
+  color: var(--text-3);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

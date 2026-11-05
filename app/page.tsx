@@ -11,7 +11,6 @@ import { ScoringModes } from "@/app/components/ScoringModes";
 import { StepClips, type Step } from "@/app/components/StepClips";
 import { StoreButtons } from "@/app/components/StoreButtons";
 import { TableSeats } from "@/app/components/TableSeats";
-import { ToggleShot } from "@/app/components/ToggleShot";
 
 const navItems = [
   { href: "#the-game", label: "The game" },
@@ -336,20 +335,6 @@ export default function Home() {
                 </div>
               </Reveal>
 
-              {/* English and Italian — the same moment in both, big enough to read */}
-              <Reveal className="tile flex min-h-[30rem] flex-col !p-6">
-                <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">English and Italian</h3>
-                <p className="mt-1.5 leading-6 text-[var(--text-2)]">The whole app, rules included, in both languages.</p>
-                <ToggleShot
-                  peek
-                  label="App language"
-                  options={[
-                    { label: "English", src: "/screenshots/predict-dark.jpg", alt: "Calling screen in English" },
-                    { label: "Italiano", src: "/screenshots/predict-italian.jpg", alt: "Calling screen in Italian" },
-                  ]}
-                />
-              </Reveal>
-
               {/* Portrait or landscape — the phone turns, the screen re-lays out */}
               <Reveal delay={0.05} className="tile flex min-h-[30rem] flex-col !p-6">
                 <h3 className="text-[1.05rem] font-semibold tracking-[-0.015em]">Portrait or landscape</h3>
@@ -361,6 +346,29 @@ export default function Home() {
                     portrait={{ src: "/screenshots/predict-dark.jpg", alt: "Calling screen, upright" }}
                     landscape={{ src: "/screenshots/landscape-predict.webp", alt: "The same calls on its side, one player at a time" }}
                   />
+                </div>
+              </Reveal>
+
+              {/* English and Italian — the same row in both, zoomed in so the words read */}
+              <Reveal className="tile grid items-center gap-8 md:col-span-2 md:grid-cols-[0.8fr_1.2fr] md:!p-8">
+                <div>
+                  <h3 className="tile__title">English and Italian</h3>
+                  <p className="tile__body">
+                    The whole app, rules included, in both languages. Switch any time in Settings.
+                  </p>
+                </div>
+                <div className="grid gap-3">
+                  {(
+                    [
+                      ["English", "/screenshots/lang-en.jpg", "Game and Stats tabs; Giulia bids first"],
+                      ["Italiano", "/screenshots/lang-it.jpg", "Partita and Statistiche tabs; Giulia apre"],
+                    ] as const
+                  ).map(([lang, src, alt]) => (
+                    <figure key={lang} className="lang-strip">
+                      <figcaption className="lang-strip__label">{lang}</figcaption>
+                      <Image src={src} alt={alt} width={568} height={216} className="lang-strip__img" />
+                    </figure>
+                  ))}
                 </div>
               </Reveal>
 
