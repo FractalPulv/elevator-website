@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Elevator Scoreboard — Score Elevator without the pen and paper",
   description:
     "Elevator Scoreboard is a mobile scoreboard for the Italian trick-taking card game where only an exact prediction scores. The round count climbs from 1 to 10 cards and back, like an elevator.",
-  icons: { icon: "/icon-dark.png", apple: "/icon-light.png" },
+  icons: { icon: "/icon-light.png", apple: "/icon-light.png" },
   openGraph: {
     title: "Elevator Scoreboard — Score Elevator without the pen and paper",
     description:
