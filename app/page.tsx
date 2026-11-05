@@ -314,10 +314,10 @@ export default function Home() {
               </Reveal>
 
               {/* Scoring modes */}
-              <Reveal className="tile flex flex-col gap-6 md:col-span-2 md:!p-8">
+              <Reveal className="tile flex flex-col gap-6">
                 <div>
                   <h3 className="tile__title">Casual or competitive</h3>
-                  <p className="tile__body !max-w-md">
+                  <p className="tile__body">
                     An exact call scores the same either way. In casual, a miss scores nothing. In competitive,
                     it costs you.
                   </p>

@@ -4,18 +4,15 @@ import { useEffect, useRef, useState } from "react";
 
 // One player's game, scored both ways. An exact call scores the same in both modes
 // (10 points plus 10 per trick called); only a miss differs. Casual: the line holds
-// flat. Competitive: it dips, 10 points for every trick off.
+// flat. Competitive: it drops, 10 points for every trick off. Few rounds and big misses,
+// so the flat steps and the drops read at a glance in a narrow tile.
 const rounds: { pts: number; off?: number }[] = [
-  { pts: 20 },
   { pts: 30 },
-  { pts: 0, off: 1 },
-  { pts: 20 },
-  { pts: 40 },
   { pts: 0, off: 2 },
-  { pts: 0, off: 1 },
   { pts: 30 },
+  { pts: 0, off: 3 },
   { pts: 20 },
-  { pts: 30 },
+  { pts: 0, off: 2 },
 ];
 
 function totals(competitive: boolean) {
@@ -27,15 +24,15 @@ function totals(competitive: boolean) {
 const casual = totals(false);
 const competitive = totals(true);
 
-const W = 600;
-const H = 200;
-const PAD = { l: 8, r: 8, t: 14, b: 26 };
+const W = 320;
+const H = 240;
+const PAD = { l: 8, r: 14, t: 14, b: 26 };
 const MAX = Math.max(...casual);
 const x = (i: number) => PAD.l + (i / rounds.length) * (W - PAD.l - PAD.r);
 const y = (v: number) => H - PAD.b - (v / MAX) * (H - PAD.t - PAD.b);
 const path = (vals: number[]) => vals.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
 
-const DRAW_MS = 2600;
+const DRAW_MS = 2200;
 
 export function ScoringModes() {
   const ref = useRef<SVGSVGElement>(null);
@@ -75,7 +72,7 @@ export function ScoringModes() {
         data-run={run > 0 ? "true" : undefined}
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label="One player's score over ten rounds. Casual: the line climbs and holds flat on the three missed calls, ending on 190. Competitive: the same climb, but it dips on each miss, ending on 150."
+        aria-label="One player's score over six rounds. Casual: the line climbs and holds flat on each of the three missed calls, ending on 80. Competitive: the same climbs, but it drops on every miss, ending on 10."
         style={{ ["--draw" as string]: `${DRAW_MS}ms` }}
       >
         <line className="mode-chart__axis" x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} />
