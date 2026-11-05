@@ -422,23 +422,20 @@ export default function Home() {
                     point live on their own phone.
                   </p>
                 </div>
+                {/* the camera pushes in inside the phone's own outline */}
                 <div className="flex justify-center">
                   <PhoneVideo
+                    className="overflow-hidden rounded-[2.4rem]"
                     src="/clips/spectate.mp4"
                     poster="/clips/spectate.jpg"
                     label="Entering room code NYYA opens the live game"
-                    cues={[
-                      {
-                        name: "Luca",
-                        color: "#d946ef",
-                        text: "The code's NYYA.",
-                        from: 1.1,
-                        to: 5.2,
-                        side: "left",
-                        y: 0.36,
-                      },
+                    camera={[
+                      { at: 0, scale: 1, x: 0.5, y: 0.5 },
+                      { at: 1.2, scale: 1.45, x: 0.5, y: 0.42 },
+                      { at: 6.6, scale: 1, x: 0.5, y: 0.5 },
+                      { at: 8.2, scale: 1.4, x: 0.5, y: 0.3 },
                     ]}
-                    width="12rem"
+                    width="13rem"
                   />
                 </div>
               </Reveal>

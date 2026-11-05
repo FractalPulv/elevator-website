@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { PhoneMockup } from "@/app/components/PhoneMockup";
 
 /** Something said at the table while the clip plays, timed to the recording. */
@@ -18,12 +18,20 @@ export type Cue = {
   y: number;
 };
 
+/**
+ * A camera move, timed to the recording: from `at` seconds, the phone is shown `scale`
+ * times bigger, centred on the point (`x`, `y`) of its screen (0 to 1 on both axes).
+ */
+export type Shot = { at: number; scale: number; x: number; y: number };
+
 type Props = {
   /** A real screen recording, sped up only where nothing happens. */
   src: string;
   poster: string;
   label: string;
   cues?: Cue[];
+  /** Push in on what's happening. Each shot eases into the next. */
+  camera?: Shot[];
   tilt?: "left" | "right" | "none";
   width?: string;
   className?: string;
@@ -39,13 +47,21 @@ type Props = {
   take?: number;
 };
 
+const REDUCE = "(prefers-reduced-motion: reduce)";
+const reducedMotion = () => window.matchMedia(REDUCE).matches;
+const subscribeReducedMotion = (cb: () => void) => {
+  const mq = window.matchMedia(REDUCE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+
 // How long the speaker stalls (a small "no" shake) before the bubble changes its words.
 const STALL = 0.5;
 
 // A phone playing a real screen recording. The speech bubbles follow the clip's clock, so
 // "Two." lands just before the tap. They belong to the people around the table, not to
 // the phone: each one comes from a player sitting just out of shot.
-export function PhoneVideo({ src, poster, label, cues = [], tilt = "none", width, className, playing, onEnded, take }: Props) {
+export function PhoneVideo({ src, poster, label, cues = [], camera = [], tilt = "none", width, className, playing, onEnded, take }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const driven = playing !== undefined;
@@ -87,7 +103,7 @@ export function PhoneVideo({ src, poster, label, cues = [], tilt = "none", width
   // Bubbles follow the clip's clock while it runs.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || cues.length === 0) return;
+    if (!video || (cues.length === 0 && camera.length === 0)) return;
     let raf = 0;
     const read = () => setT(Math.round(video.currentTime * 10) / 10);
     const tick = () => {
@@ -113,10 +129,22 @@ export function PhoneVideo({ src, poster, label, cues = [], tilt = "none", width
       video.removeEventListener("pause", stop);
       video.removeEventListener("seeked", seeked);
     };
-  }, [cues.length]);
+  }, [cues.length, camera.length]);
+
+  // the latest shot that has started; reduced motion keeps the wide view
+  const still = useSyncExternalStore(subscribeReducedMotion, reducedMotion, () => false);
+  const shot = still ? undefined : [...camera].reverse().find((c) => t >= c.at);
 
   return (
     <div ref={wrapRef} className={`relative${className ? ` ${className}` : ""}`}>
+      <div
+        className="phone-camera"
+        style={
+          shot
+            ? { transform: `scale(${shot.scale})`, transformOrigin: `${shot.x * 100}% ${shot.y * 100}%` }
+            : undefined
+        }
+      >
       <PhoneMockup tilt={tilt} width={width}>
         <video
           ref={videoRef}
@@ -131,6 +159,7 @@ export function PhoneVideo({ src, poster, label, cues = [], tilt = "none", width
           onEnded={driven ? onEnded : undefined}
         />
       </PhoneMockup>
+      </div>
       {cues.map((c) => {
         const on = t >= c.from && t < c.to;
         const changed = c.then !== undefined && t >= c.then.at;
