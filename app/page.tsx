@@ -7,6 +7,7 @@ import { PhoneMockup } from "@/app/components/PhoneMockup";
 import { PhoneVideo, type Cue } from "@/app/components/PhoneVideo";
 import { Reveal } from "@/app/components/Reveal";
 import { RotateShot } from "@/app/components/RotateShot";
+import { IndieMaker } from "@/app/components/IndieMaker";
 import { ScoringModes } from "@/app/components/ScoringModes";
 import { StepClips, type Step } from "@/app/components/StepClips";
 import { StoreButtons } from "@/app/components/StoreButtons";
@@ -456,7 +457,7 @@ export default function Home() {
               </Reveal>
 
               {/* Six players */}
-              <Reveal delay={0.1} className="tile grid items-center gap-8 sm:grid-cols-[0.8fr_1.2fr] md:col-span-3 md:!p-8">
+              <Reveal delay={0.1} className="tile flex flex-col gap-8 md:col-span-2 md:!p-8">
                 <div>
                   <h3 className="tile__title">Six at the table</h3>
                   <p className="tile__body">
@@ -470,6 +471,16 @@ export default function Home() {
                     <PhoneMockup src="/screenshots/six-score.webp" alt="Scoring grid for six players" landscape width="100%" />
                   </div>
                 </div>
+              </Reveal>
+
+              {/* Indie */}
+              <Reveal delay={0.15} className="tile flex flex-col !p-6">
+                <h3 className="tile__title">Support indie development</h3>
+                <p className="tile__body">
+                  Elevator Scoreboard is made by one person, not a studio. No ads, no subscription: Pro is what
+                  keeps it going.
+                </p>
+                <IndieMaker />
               </Reveal>
             </div>
           </div>
