@@ -10,16 +10,16 @@ export const decks = {
   italian: {
     hand: [
       "/cards/30_clubs_king.webp",
-      "/cards/39_swords_knight.webp",
+      "/cards/40_swords_king.webp",
       "/cards/20_cups_king.webp",
       "/cards/01_coins_ace.webp",
     ],
     trick: [
       "/cards/01_coins_ace.webp",
       "/cards/20_cups_king.webp",
-      "/cards/39_swords_knight.webp",
+      "/cards/40_swords_king.webp",
       "/cards/30_clubs_king.webp",
-      "/cards/31_swords_ace.webp",
+      "/cards/21_clubs_ace.webp",
       "/cards/19_cups_knight.webp",
     ],
   },
