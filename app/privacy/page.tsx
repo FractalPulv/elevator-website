@@ -65,12 +65,10 @@ export default function PrivacyPolicy() {
           </p>
           <p>
             <strong className="text-[var(--text)]">Usage analytics.</strong> The app records which screens you
-            open and a few game milestones (a game started, a round scored, a game finished), with details
-            such as the number of players, the card deck, and the <strong className="text-[var(--text)]">names
-            of the players</strong> in the game and who won. Player names often belong to friends at your
-            table, so please only add names they&apos;re happy to share. Events are tied to a random ID created
-            on install, not to an account. Player photos, spectator codes and anything you type are never
-            included, and nothing is used for advertising.
+            open and a few game milestones (a game started, a round scored, a game finished), with game
+            details such as the number of players, the card deck, the players&apos; display names and who won.
+            Events are tied to a random ID created on install, not to an account. Player photos, spectator
+            codes and anything else you type are never included, and nothing is used for advertising.
           </p>
           <p>
             <strong className="text-[var(--text)]">Session recordings.</strong> To find and fix bugs, the app may
