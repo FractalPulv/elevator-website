@@ -26,14 +26,46 @@ export function IndieMaker() {
         />
 
         {/* the laptop, back towards us, screen glowing at the edges */}
-        <path d="M84 112 L156 112 L162 150 L78 150 Z" fill="var(--surface)" stroke="var(--accent)" strokeOpacity="0.55" strokeWidth="1.5" />
-        <rect x="113" y="125" width="14" height="14" rx="4" fill="var(--accent)" fillOpacity="0.5" />
+        <path
+          d="M84 112 L156 112 L162 150 L78 150 Z"
+          fill="var(--surface)"
+          stroke="var(--accent)"
+          strokeOpacity="0.55"
+          strokeWidth="1.5"
+        />
+        <rect
+          x="113"
+          y="125"
+          width="14"
+          height="14"
+          rx="4"
+          fill="var(--accent)"
+          fillOpacity="0.5"
+        />
 
         {/* the desk */}
         <rect x="30" y="150" width="180" height="4" rx="2" fill="var(--line)" />
         {/* a couple of cards on it */}
-        <rect x="178" y="138" width="14" height="12" rx="2" fill="var(--text-3)" fillOpacity="0.35" transform="rotate(-12 185 144)" />
-        <rect x="190" y="139" width="14" height="11" rx="2" fill="var(--text-3)" fillOpacity="0.25" transform="rotate(9 197 144)" />
+        <rect
+          x="178"
+          y="138"
+          width="14"
+          height="12"
+          rx="2"
+          fill="var(--text-3)"
+          fillOpacity="0.35"
+          transform="rotate(-12 185 144)"
+        />
+        <rect
+          x="190"
+          y="139"
+          width="14"
+          height="11"
+          rx="2"
+          fill="var(--text-3)"
+          fillOpacity="0.25"
+          transform="rotate(9 197 144)"
+        />
       </svg>
     </div>
   );

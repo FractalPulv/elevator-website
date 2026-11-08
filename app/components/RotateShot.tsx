@@ -19,20 +19,39 @@ export function RotateShot({ portrait, landscape }: Props) {
   useEffect(() => {
     if (sideways === showLandscape) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const id = window.setTimeout(() => setShowLandscape(sideways), still ? 0 : 330);
+    const id = window.setTimeout(
+      () => setShowLandscape(sideways),
+      still ? 0 : 330,
+    );
     return () => window.clearTimeout(id);
   }, [sideways, showLandscape]);
 
   return (
     <div className="flex flex-col items-center gap-5">
       <div className="flex h-[19rem] w-full items-center justify-center">
-        <div className="rotate-shot" data-sideways={sideways ? "true" : undefined}>
+        <div
+          className="rotate-shot"
+          data-sideways={sideways ? "true" : undefined}
+        >
           <PhoneMockup width="8.4rem">
-            <div className="rotate-shot__screen" data-swap={showLandscape ? "true" : undefined}>
-              <Image className="phone__img rotate-shot__p" src={portrait.src} alt={portrait.alt} fill />
+            <div
+              className="rotate-shot__screen"
+              data-swap={showLandscape ? "true" : undefined}
+            >
+              <Image
+                className="phone__img rotate-shot__p"
+                src={portrait.src}
+                alt={portrait.alt}
+                fill
+              />
               {/* the landscape capture, turned back upright inside the turned phone */}
               <span className="rotate-shot__l">
-                <Image className="phone__img" src={landscape.src} alt={landscape.alt} fill />
+                <Image
+                  className="phone__img"
+                  src={landscape.src}
+                  alt={landscape.alt}
+                  fill
+                />
               </span>
             </div>
           </PhoneMockup>

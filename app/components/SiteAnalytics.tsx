@@ -74,7 +74,8 @@ export default function SiteAnalytics() {
     });
   }, []);
 
-  const skipOwner = <T,>(event: T) => (typeof document !== "undefined" && isOwnerDevice() ? null : event);
+  const skipOwner = <T,>(event: T) =>
+    typeof document !== "undefined" && isOwnerDevice() ? null : event;
   return (
     <>
       <Analytics beforeSend={skipOwner} />

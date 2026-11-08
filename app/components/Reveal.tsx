@@ -13,7 +13,12 @@ type RevealProps = {
 
 // Tasteful single entrance: fade + small rise once on scroll-in.
 // Collapses to a plain fade (no movement) when the user prefers reduced motion.
-export function Reveal({ children, className, delay = 0, as = "div" }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as = "div",
+}: RevealProps) {
   const reduce = useReducedMotion();
   const MotionTag = motion[as];
 

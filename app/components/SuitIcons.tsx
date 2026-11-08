@@ -98,7 +98,10 @@ export function FrenchDiamond({ size = 24, className, title }: SuitIconProps) {
   return (
     <svg {...svgProps(size, className, title)} viewBox="0 0 512 512">
       {title ? <title>{title}</title> : null}
-      <polygon fill="currentColor" points="256,0 72.115,256 256,512 439.885,256" />
+      <polygon
+        fill="currentColor"
+        points="256,0 72.115,256 256,512 439.885,256"
+      />
     </svg>
   );
 }
