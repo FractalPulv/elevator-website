@@ -1,0 +1,8 @@
+# Not recorded: every bid locked (2, 1, 0, 1), scoring phase on screen.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- runFlow: lastcall-setup.yaml
+- tapOn: { id: "lock-current" }
+- tapOn: { id: "pred-plus-seed-3" }
+- tapOn: { id: "lock-current" }
+- waitForAnimationToEnd

@@ -1,0 +1,10 @@
+# Clip: tricks tapped in as they're won, then the round is scored.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- tapOn: { id: "won-plus-seed-0" }
+- tapOn: { id: "won-plus-seed-2" }
+- tapOn: { id: "won-plus-seed-0" }
+- tapOn: { id: "won-plus-seed-1" }
+- tapOn: { id: "won-plus-seed-3" }
+- tapOn: "Score Round"
+- waitForAnimationToEnd

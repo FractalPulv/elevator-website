@@ -1,0 +1,9 @@
+# Not recorded: Giulia 2 and Marco 1 locked, Sofia up.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- tapOn: { id: "pred-plus-seed-0" }
+- tapOn: { id: "pred-plus-seed-0" }
+- tapOn: { id: "lock-current" }
+- tapOn: { id: "pred-plus-seed-1" }
+- tapOn: { id: "lock-current" }
+- waitForAnimationToEnd

@@ -1,0 +1,15 @@
+# Not recorded. Seeds the game (dev builds only) and opens the board.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- launchApp:
+    stopApp: true
+- openLink: elevatorscoreboard://dev-seed?round=${ROUND}
+- extendedWaitUntil:
+    visible: "Round ${ROUND} of.*"
+    timeout: 15000
+- tapOn: "Round ${ROUND} of.*"
+- extendedWaitUntil:
+    visible:
+      id: "lock-current"
+    timeout: 10000
+- waitForAnimationToEnd

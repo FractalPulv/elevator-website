@@ -1,0 +1,7 @@
+# A held beat (Maestro has no sleep): wait for text that never appears.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- extendedWaitUntil:
+    visible: "__never_on_screen__"
+    timeout: ${MS}
+    optional: true

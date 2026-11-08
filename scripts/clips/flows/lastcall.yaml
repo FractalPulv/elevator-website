@@ -1,0 +1,12 @@
+# Clip: Sofia calls 0. Luca, last, tries 2 (forbidden), then calls 1.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- tapOn: { id: "lock-current" }
+- waitForAnimationToEnd
+- tapOn: { id: "pred-plus-seed-3" }
+- tapOn: { id: "pred-plus-seed-3" }
+- assertVisible: ".*can't bid.*"
+- runFlow: { file: pause.yaml, env: { MS: 1300 } } # let the refusal read
+- tapOn: { id: "pred-minus-seed-3" }
+- tapOn: { id: "lock-current" }
+- waitForAnimationToEnd

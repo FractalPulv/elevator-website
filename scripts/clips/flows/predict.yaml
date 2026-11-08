@@ -1,0 +1,9 @@
+# Clip: Giulia calls two; it's entered and locked.
+appId: com.pulv.elevatorscoreboard.dev
+---
+- waitForAnimationToEnd
+- tapOn: { id: "pred-plus-seed-0" }
+- tapOn: { id: "pred-plus-seed-0", waitToSettleTimeoutMs: 600 }
+- runFlow: { file: pause.yaml, env: { MS: 900 } } # no-op beat so the bid reads
+- tapOn: { id: "lock-current" }
+- waitForAnimationToEnd
