@@ -18,7 +18,9 @@ PAPER = (250, 248, 242)
 # Only scans whose frame is found at full confidence: the swords knight and swords ace
 # scans don't have a clean frame and came out crooked.
 CARDS = ["01_coins_ace", "20_cups_king", "30_clubs_king", "40_swords_king",
-         "21_clubs_ace", "19_cups_knight", "10_coins_king"]
+         "21_clubs_ace", "19_cups_knight", "10_coins_king",
+         # the deck tile's hand, card for card the same as the poker hand
+         "37_swords_7", "23_clubs_3", "17_cups_7"]
 
 def lines(px, w, h, thr):
     cd = lambda x: sum(px[x, y] < 100 for y in range(h // 4, 3 * h // 4, 2)) / (h / 4)

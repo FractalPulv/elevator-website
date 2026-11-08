@@ -52,8 +52,9 @@ ${c}
 }
 
 const cards: [number, FrenchSuitName][] = [
-  [10, "clubs"], [7, "spades"], [9, "hearts"], [1, "diamonds"],
-  [1, "hearts"], [7, "diamonds"], [10, "spades"], [4, "clubs"], [9, "diamonds"], [2, "hearts"],
+  // the app's default poker deck has no 8, 9 or 10, so neither does the site
+  [7, "spades"], [3, "clubs"], [7, "hearts"], [1, "diamonds"],
+  [1, "hearts"], [7, "diamonds"], [5, "spades"], [4, "clubs"], [3, "diamonds"], [2, "hearts"],
 ];
 for (const [r, s] of cards) writeFileSync(join(OUT, `${NAMES[r]}-${s}.svg`), card(r, s));
 console.log(`wrote ${cards.length} cards to ${OUT}`);
