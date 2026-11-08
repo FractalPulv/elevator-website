@@ -27,7 +27,11 @@ export function StepClips({ steps }: { steps: Step[] }) {
   const [active, setActive] = useState(0);
   // bumped on every turn, so a step that plays twice in a row (the only one on screen) restarts
   const [take, setTake] = useState(0);
-  const still = useSyncExternalStore(subscribeMotion, prefersStill, () => false);
+  const still = useSyncExternalStore(
+    subscribeMotion,
+    prefersStill,
+    () => false,
+  );
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [seen, setSeen] = useState<boolean[]>(() => steps.map(() => false));
 
@@ -67,7 +71,7 @@ export function StepClips({ steps }: { steps: Step[] }) {
   }
 
   return (
-    <div className="steps mt-16 grid gap-16 md:grid-cols-3 md:gap-8">
+    <div className="steps mx-auto mt-16 grid max-w-3xl gap-16 md:grid-cols-2 md:gap-8">
       {steps.map((step, i) => {
         const on = !still && anySeen && i === current;
         return (
@@ -91,15 +95,21 @@ export function StepClips({ steps }: { steps: Step[] }) {
               onEnded={next}
             />
             <h3 className="mt-10 text-xl font-semibold tracking-[-0.02em]">
-              <button type="button" className="step__head" onClick={() => {
+              <button
+                type="button"
+                className="step__head"
+                onClick={() => {
                   setActive(i);
                   setTake((v) => v + 1);
-                }}>
+                }}
+              >
                 <span className="step-num">{i + 1}</span>
                 {step.title}
               </button>
             </h3>
-            <p className="mt-3 max-w-[18rem] leading-6 text-[var(--text-2)]">{step.body}</p>
+            <p className="mt-3 max-w-[18rem] leading-6 text-[var(--text-2)]">
+              {step.body}
+            </p>
           </div>
         );
       })}

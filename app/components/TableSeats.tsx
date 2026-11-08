@@ -34,7 +34,8 @@ const notes: Record<number, string> = {
 
 /** The elevator: 1 card each up to the top floor, the top floor twice, then back down. */
 function floorsFor(count: number) {
-  const top = Math.min(10, Math.floor(40 / count));
+  // as the app counts it: the cards shared out evenly (13 each for three players), no cap
+  const top = Math.floor(40 / count);
   const up = Array.from({ length: top }, (_, i) => i + 1);
   return [...up, ...up.slice().reverse()];
 }
@@ -45,6 +46,20 @@ function seat(i: number, n: number) {
   const x = Math.cos(a);
   const y = Math.sin(a);
   return { x, y, depth: (y + 1) / 2 }; // depth 0 = far side, 1 = nearest
+}
+
+// A side player holds the fan out over the table, angled towards the middle. The two
+// sides are mirror images: Giulia on the left fans to her right, Sofia on the right
+// fans to her left, so the hands never look like copies of each other.
+function sideHand(x: number) {
+  const inward = -x; // +1 for the left seat, -1 for the right
+  return [
+    `translateX(${(inward * 0.7).toFixed(2)}rem)`,
+    "perspective(170px) rotateX(16deg)",
+    `rotateY(${(inward * 48).toFixed(1)}deg)`,
+    `rotate(${(inward * 14).toFixed(1)}deg)`,
+    x > 0.2 ? "scaleX(-1)" : "",
+  ].join(" ");
 }
 
 export function TableSeats() {
@@ -65,7 +80,9 @@ export function TableSeats() {
   useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.4 });
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), {
+      threshold: 0.4,
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -73,13 +90,26 @@ export function TableSeats() {
   useEffect(() => {
     if (paused || !visible) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = window.setInterval(() => setRound((v) => (v + 1) % floorsFor(count).length), ROUND_MS);
+    const id = window.setInterval(
+      () => setRound((v) => (v + 1) % floorsFor(count).length),
+      ROUND_MS,
+    );
     return () => window.clearInterval(id);
   }, [paused, visible, count]);
 
   return (
-    <div className="flex h-full flex-col" onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
-      <div ref={sceneRef} className="table-scene" data-deck={deck} aria-label={`${count} players, ${cards} cards each`} role="img">
+    <div
+      className="flex h-full flex-col"
+      onPointerEnter={() => setPaused(true)}
+      onPointerLeave={() => setPaused(false)}
+    >
+      <div
+        ref={sceneRef}
+        className="table-scene"
+        data-deck={deck}
+        aria-label={`${count} players, ${cards} cards each`}
+        role="img"
+      >
         <div className="table-scene__felt" />
         {players.slice(0, count).map((p, i) => {
           const s = seat(i, count);
@@ -144,7 +174,7 @@ export function TableSeats() {
               <span
                 className={`pawn__hand${near ? " pawn__hand--near" : ""}`}
                 aria-hidden="true"
-                style={near ? undefined : { transform: `perspective(170px) rotateX(16deg) rotateY(${(-s.x * 52).toFixed(1)}deg)` }}
+                style={near ? undefined : { transform: sideHand(s.x) }}
               >
                 {Array.from({ length: cards }).map((_, c) => {
                   const angle = (c - (cards - 1) / 2) * spread;
@@ -156,10 +186,17 @@ export function TableSeats() {
                     <span
                       key={c}
                       className={`table-card table-card--held table-card--face${deck === "poker" ? " table-card--poker" : ""}`}
-                      style={{ ...style, backgroundImage: `url(${faceUp[c % faceUp.length]})` }}
+                      style={{
+                        ...style,
+                        backgroundImage: `url(${faceUp[c % faceUp.length]})`,
+                      }}
                     />
                   ) : (
-                    <span key={c} className="table-card table-card--held card-back" style={style} />
+                    <span
+                      key={c}
+                      className="table-card table-card--held card-back"
+                      style={style}
+                    />
                   );
                 })}
               </span>
@@ -183,9 +220,18 @@ export function TableSeats() {
               style={{ animationDuration: `${ROUND_MS}ms` }}
             >
               <circle cx="10" cy="10" r="8" className="round-timer__track" />
-              <circle cx="10" cy="10" r="8" className="round-timer__fill" style={{ animationDuration: `${ROUND_MS}ms` }} />
+              <circle
+                cx="10"
+                cy="10"
+                r="8"
+                className="round-timer__fill"
+                style={{ animationDuration: `${ROUND_MS}ms` }}
+              />
             </svg>
-            Round {r + 1} <span className="font-normal text-[var(--text-3)]">of {floors.length}</span>
+            Round {r + 1}{" "}
+            <span className="font-normal text-[var(--text-3)]">
+              of {floors.length}
+            </span>
           </span>
           <span className="tabular-nums text-[var(--text-2)]">
             {cards} {cards === 1 ? "card" : "cards"} each
@@ -199,7 +245,9 @@ export function TableSeats() {
               className="floors__bar"
               aria-label={`Round ${i + 1}, ${f} cards`}
               aria-current={i === r ? "step" : undefined}
-              style={{ height: `${(f / floors[floors.length / 2 - 1]) * 100}%` }}
+              style={{
+                height: `${(f / floors[floors.length / 2 - 1]) * 100}%`,
+              }}
               onClick={() => setRound(i)}
             />
           ))}

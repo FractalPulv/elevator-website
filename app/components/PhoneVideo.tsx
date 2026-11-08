@@ -58,10 +58,39 @@ const subscribeReducedMotion = (cb: () => void) => {
 // How long the speaker stalls (a small "no" shake) before the bubble changes its words.
 const STALL = 0.5;
 
+// The bubble's tail, drawn for a speaker on the left (CSS mirrors it for the right). Its
+// square end reaches well inside the bubble, so body and tail fill as one shape and the
+// bubble's drop-shadow outlines both together. The curves meet the bubble's edges at a
+// tangent, so there's no corner where they join.
+function BubbleTail() {
+  return (
+    <svg
+      className="bubble__tail"
+      viewBox="0 0 18 16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M8 0H18V12H14C11 12 6.5 15.6 1 16C4.6 13.6 8 9.5 8 3Z" />
+    </svg>
+  );
+}
+
 // A phone playing a real screen recording. The speech bubbles follow the clip's clock, so
 // "Two." lands just before the tap. They belong to the people around the table, not to
 // the phone: each one comes from a player sitting just out of shot.
-export function PhoneVideo({ src, poster, label, cues = [], camera = [], tilt = "none", width, className, playing, onEnded, take }: Props) {
+export function PhoneVideo({
+  src,
+  poster,
+  label,
+  cues = [],
+  camera = [],
+  tilt = "none",
+  width,
+  className,
+  playing,
+  onEnded,
+  take,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const driven = playing !== undefined;
@@ -132,38 +161,49 @@ export function PhoneVideo({ src, poster, label, cues = [], camera = [], tilt = 
   }, [cues.length, camera.length]);
 
   // the latest shot that has started; reduced motion keeps the wide view
-  const still = useSyncExternalStore(subscribeReducedMotion, reducedMotion, () => false);
+  const still = useSyncExternalStore(
+    subscribeReducedMotion,
+    reducedMotion,
+    () => false,
+  );
   const shot = still ? undefined : [...camera].reverse().find((c) => t >= c.at);
 
   return (
-    <div ref={wrapRef} className={`relative${className ? ` ${className}` : ""}`}>
+    <div
+      ref={wrapRef}
+      className={`relative${className ? ` ${className}` : ""}`}
+    >
       <div
         className="phone-camera"
         style={
           shot
-            ? { transform: `scale(${shot.scale})`, transformOrigin: `${shot.x * 100}% ${shot.y * 100}%` }
+            ? {
+                transform: `scale(${shot.scale})`,
+                transformOrigin: `${shot.x * 100}% ${shot.y * 100}%`,
+              }
             : undefined
         }
       >
-      <PhoneMockup tilt={tilt} width={width}>
-        <video
-          ref={videoRef}
-          className="phone__video"
-          src={src}
-          poster={poster}
-          muted
-          loop={!driven}
-          playsInline
-          preload="metadata"
-          aria-label={label}
-          onEnded={driven ? onEnded : undefined}
-        />
-      </PhoneMockup>
+        <PhoneMockup tilt={tilt} width={width}>
+          <video
+            ref={videoRef}
+            className="phone__video"
+            src={src}
+            poster={poster}
+            muted
+            loop={!driven}
+            playsInline
+            preload="metadata"
+            aria-label={label}
+            onEnded={driven ? onEnded : undefined}
+          />
+        </PhoneMockup>
       </div>
       {cues.map((c) => {
         const on = t >= c.from && t < c.to;
         const changed = c.then !== undefined && t >= c.then.at;
-        const stalling = c.then !== undefined && !changed && t >= c.then.at - STALL;
+        const stalling =
+          c.then !== undefined && !changed && t >= c.then.at - STALL;
         const text = changed && c.then ? c.then.text : c.text;
         return (
           <span
@@ -175,9 +215,17 @@ export function PhoneVideo({ src, poster, label, cues = [], camera = [], tilt = 
           >
             {/* the speaker, sitting just out of shot */}
             <span className="bubble__who">{c.name[0]}</span>
-            <span className="bubble__box" data-stall={stalling ? "true" : undefined}>
+            <span
+              className="bubble__box"
+              data-stall={stalling ? "true" : undefined}
+            >
+              <BubbleTail />
               <span className="bubble__name">{c.name}</span>
-              <span key={text} className="bubble__text" data-swap={changed ? "true" : undefined}>
+              <span
+                key={text}
+                className="bubble__text"
+                data-swap={changed ? "true" : undefined}
+              >
                 {text}
               </span>
             </span>
