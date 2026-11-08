@@ -43,3 +43,6 @@ next-env.d.ts
 # local tool cache
 .fallow/
 .capture/
+
+# extra dev servers (NEXT_DIST_DIR)
+/.next-*

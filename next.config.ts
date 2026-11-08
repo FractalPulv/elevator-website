@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+	// lets several dev servers run side by side (NEXT_DIST_DIR=.next-a next dev -p 3101)
+	distDir: process.env.NEXT_DIST_DIR || ".next",
 	turbopack: {
 		root: configDir,
 	},
