@@ -7,6 +7,8 @@
   --elev: #18181c;
   --surface: rgba(255, 255, 255, 0.035);
   --surface-2: rgba(255, 255, 255, 0.055);
+  /* a tile's colour as a solid: --surface over --bg, for fades that hide what's behind */
+  --tile-solid: #121214;
 
   /* The one accent — violet, from the app icon */
   --accent: #8983ff;
@@ -27,7 +29,8 @@
   --line: rgba(255, 255, 255, 0.08);
   --line-soft: rgba(255, 255, 255, 0.045);
 
-  --font-sans: "Helvetica Neue", Helvetica, "Arial Nova", Arial, system-ui, sans-serif;
+  --font-sans:
+    "Helvetica Neue", Helvetica, "Arial Nova", Arial, system-ui, sans-serif;
 }
 
 @theme inline {
@@ -59,8 +62,16 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(106, 98, 240, 0.22), transparent 55%),
-    radial-gradient(90% 60% at 100% 8%, rgba(137, 131, 255, 0.1), transparent 50%),
+    radial-gradient(
+      120% 80% at 50% -10%,
+      rgba(106, 98, 240, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 60% at 100% 8%,
+      rgba(137, 131, 255, 0.1),
+      transparent 50%
+    ),
     var(--bg);
 }
 
@@ -229,26 +240,14 @@ button:focus-visible {
 }
 
 .phone3d {
-  /* Base pose (set per tilt) + pointer offset (--px/--py, -1..1, set from JS). */
+  /* a fixed pose per tilt; it doesn't follow the pointer */
   --ry: 0deg;
   --rx: 0deg;
   --rz: 0deg;
-  --px: 0;
-  --py: 0;
-  --lift: 0px;
   position: relative;
   aspect-ratio: 1206 / 2622;
   transform-style: preserve-3d;
-  /* the pointer only nudges the pose: a couple of degrees, never a toy */
-  transform: rotateY(calc(var(--ry) + var(--px) * 2.5deg)) rotateX(calc(var(--rx) - var(--py) * 2deg))
-    rotateZ(var(--rz)) translateZ(var(--lift));
-  transition: transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* While the pointer is over it: follow gently and come up a touch. */
-.phone3d[data-active] {
-  --lift: 6px;
-  transition-duration: 400ms;
+  transform: rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz));
 }
 
 /* On its side: swap the aspect and every elliptical radius; the island moves to the left edge. */
@@ -321,8 +320,14 @@ button:focus-visible {
   transform: translateZ(0.5px);
   border-radius: 17% / 8%;
   padding: 3.6%;
-  background:
-    linear-gradient(135deg, #6a6c72, #1f2024 24%, #7a7c82 50%, #1c1d21 76%, #6a6c72);
+  background: linear-gradient(
+    135deg,
+    #6a6c72,
+    #1f2024 24%,
+    #7a7c82 50%,
+    #1c1d21 76%,
+    #6a6c72
+  );
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.9),
     inset 0 2px 2px rgba(255, 255, 255, 0.5),
@@ -338,7 +343,9 @@ button:focus-visible {
   overflow: hidden;
   background: #000;
   /* thin true-black bezel between the titanium rail and the screen */
-  box-shadow: 0 0 0 2px #050506, inset 0 0 4px rgba(0, 0, 0, 0.9);
+  box-shadow:
+    0 0 0 2px #050506,
+    inset 0 0 4px rgba(0, 0, 0, 0.9);
 }
 
 /* iPhone 17 Pro geometry, so it lands on the captured status bar's gap. */
@@ -416,7 +423,8 @@ button:focus-visible {
   align-items: flex-end;
   gap: 0.45rem;
   opacity: 0;
-  transform: translateY(var(--bubble-lift, -50%)) translateX(var(--from, 0)) scale(0.85);
+  transform: translateY(var(--bubble-lift, -50%)) translateX(var(--from, 0))
+    scale(0.85);
   transition:
     opacity 200ms ease,
     transform 320ms cubic-bezier(0.3, 1.3, 0.5, 1);
@@ -441,7 +449,11 @@ button:focus-visible {
   font-weight: 700;
   color: #fff;
   background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(
+      circle at 34% 28%,
+      rgba(255, 255, 255, 0.35),
+      transparent 55%
+    ),
     var(--who);
   box-shadow:
     0 0 0 3px var(--bg),
@@ -461,20 +473,21 @@ button:focus-visible {
   font-weight: 650;
   line-height: 1.2;
   white-space: nowrap;
-  box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.5),
-    0 2px 6px rgba(0, 0, 0, 0.3);
+  /* one shadow round body and tail together (a box-shadow would skip the tail and
+     darken where it tucks in) */
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.42))
+    drop-shadow(0 2px 3px rgb(0 0 0 / 0.28));
 }
 
-/* the tail: a small curl down towards the speaker */
-.bubble__box::after {
-  content: "";
+/* the tail: a curl from the bubble's bottom corner towards the speaker */
+.bubble__tail {
   position: absolute;
-  bottom: -0.05rem;
-  width: 0.9rem;
-  height: 0.9rem;
-  background: inherit;
   z-index: -1;
+  bottom: -0.25rem;
+  width: 1.125rem;
+  height: 1rem;
+  fill: #f4f4f6;
+  overflow: visible;
 }
 
 .bubble__name {
@@ -532,14 +545,13 @@ button:focus-visible {
   transform-origin: 0% 100%;
 }
 
+/* the tail covers this corner, so it stays square underneath */
 .bubble--left .bubble__box {
-  border-bottom-left-radius: 0.3rem;
+  border-bottom-left-radius: 0;
 }
 
-.bubble--left .bubble__box::after {
-  left: -0.3rem;
-  border-bottom-right-radius: 0.9rem;
-  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+.bubble--left .bubble__tail {
+  left: -0.5rem;
 }
 
 .bubble--right {
@@ -550,12 +562,12 @@ button:focus-visible {
 }
 
 .bubble--right .bubble__box {
-  border-bottom-right-radius: 0.3rem;
+  border-bottom-right-radius: 0;
 }
 
-.bubble--right .bubble__box::after {
-  right: -0.3rem;
-  clip-path: polygon(0 0, 100% 100%, 0 100%);
+.bubble--right .bubble__tail {
+  right: -0.5rem;
+  scale: -1 1;
 }
 
 /* Narrow screens: the steps stack and the phone fills the column, so the speakers lean
@@ -642,7 +654,7 @@ button:focus-visible {
   z-index: 5;
   pointer-events: none;
   background: radial-gradient(
-    120% 70% at calc(20% + var(--px) * 30%) calc(10% + var(--py) * 20%),
+    120% 70% at 20% 10%,
     rgba(255, 255, 255, 0.14),
     rgba(255, 255, 255, 0.03) 40%,
     transparent 62%
@@ -817,8 +829,12 @@ button:focus-visible {
   top: 16%;
   bottom: 14%;
   border-radius: 50%;
-  background:
-    radial-gradient(70% 70% at 50% 38%, #1f5a3d, #133a28 70%, #0e2c1f);
+  background: radial-gradient(
+    70% 70% at 50% 38%,
+    #1f5a3d,
+    #133a28 70%,
+    #0e2c1f
+  );
   box-shadow:
     0 0 0 7px #3a2618,
     0 0 0 9px #24170e,
@@ -848,7 +864,11 @@ button:focus-visible {
   height: 1.45rem;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.75), transparent 38%),
+    radial-gradient(
+      circle at 34% 30%,
+      rgba(255, 255, 255, 0.75),
+      transparent 38%
+    ),
     radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.35), transparent 70%),
     var(--pawn);
 }
@@ -859,9 +879,12 @@ button:focus-visible {
   margin-top: -0.2rem;
   border-radius: 1.3rem 1.3rem 0.5rem 0.5rem;
   background:
-    radial-gradient(90% 80% at 32% 18%, rgba(255, 255, 255, 0.45), transparent 50%),
-    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.35)),
-    var(--pawn);
+    radial-gradient(
+      90% 80% at 32% 18%,
+      rgba(255, 255, 255, 0.45),
+      transparent 50%
+    ),
+    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.35)), var(--pawn);
 }
 
 /* A fan of face-down cards held up in front of the player. */
@@ -903,7 +926,12 @@ button:focus-visible {
 .card-fan__face.card-back {
   border-width: 0.32rem;
   background:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 6px, transparent 6px 12px) padding-box,
+    repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.07) 0 6px,
+        transparent 6px 12px
+      )
+      padding-box,
     linear-gradient(var(--back), var(--back)) padding-box,
     #f4f1ea border-box;
 }
@@ -1109,19 +1137,42 @@ button:focus-visible {
 
 /* ---- Deck tile: four cards of the current deck ---- */
 .deck-card {
+  position: relative;
   width: 22%;
   max-width: 4.6rem;
   aspect-ratio: 360 / 620;
   border-radius: 8.3% / 4.8%;
-  background: center / 100% 100% no-repeat;
+  overflow: hidden;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
   animation: fade-in 350ms ease both;
+  /* the card reshapes between the two decks while the faces cross-fade */
+  transition:
+    aspect-ratio 480ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 480ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.deck-card--poker {
-  align-self: flex-end;
+.deck-card[data-deck="poker"] {
   aspect-ratio: 5 / 7;
   border-radius: 7% / 5%;
+}
+
+.deck-card__face {
+  position: absolute;
+  inset: 0;
+  background: center / 100% 100% no-repeat;
+  opacity: 0;
+  transition: opacity 480ms ease;
+}
+
+.deck-card__face[data-on] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-card,
+  .deck-card__face {
+    transition: none;
+  }
 }
 
 /* ---- The table: the deal, angled hands, the near player's cards ---- */
@@ -1215,33 +1266,6 @@ button:focus-visible {
 }
 
 /* ---- Casual vs competitive: one game, scored both ways ---- */
-:root {
-  --casual: #8983ff;
-  --competitive: #f2b14c;
-}
-
-.mode-key {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--text-2);
-}
-
-.mode-key::before {
-  content: "";
-  width: 1rem;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--c);
-}
-
-.mode-key--miss::before {
-  width: 0.8rem;
-  height: 0.8rem;
-  border-radius: 3px;
-  background: rgba(248, 113, 113, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.35);
-}
 
 .mode-chart {
   width: 100%;
@@ -1261,23 +1285,26 @@ button:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-
-.mode-chart__miss {
-  fill: rgba(248, 113, 113, 0.1);
-  stroke: rgba(248, 113, 113, 0.22);
-  stroke-width: 1;
-  opacity: 0;
-}
-
 .mode-chart__line {
   fill: none;
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
 }
 
+.mode-chart__label {
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.mode-chart__score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
+/* dots and labels arrive once the lines have drawn */
 .mode-chart__end {
   opacity: 0;
 }
@@ -1286,13 +1313,8 @@ button:focus-visible {
   animation: chart-draw var(--draw) cubic-bezier(0.45, 0, 0.55, 1) forwards;
 }
 
-.mode-chart[data-run] .mode-chart__miss {
-  animation: fade-in 300ms ease forwards;
-}
-
 .mode-chart[data-run] .mode-chart__end {
-  animation: pop 320ms cubic-bezier(0.3, 1.5, 0.5, 1) forwards;
-  animation-delay: var(--draw);
+  animation: fade-in 360ms ease var(--draw) forwards;
 }
 
 @keyframes chart-draw {
@@ -1301,55 +1323,55 @@ button:focus-visible {
   }
 }
 
-/* ---- The card game itself: three beats ---- */
+/* ---- The card game itself: three beats beside the table, ruled like a list ---- */
+.beats {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .beat {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.2rem 1rem;
-  align-items: baseline;
+  grid-template-columns: 1.9rem 1fr;
+  gap: 0.35rem 0.95rem;
+  align-content: center;
+  flex: 1;
+  padding: 1.35rem 0.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.beat:last-child {
+  border-bottom: 1px solid var(--line);
 }
 
 .beat__num {
   grid-row: span 2;
-  font-size: 0.8rem;
+  align-self: start;
+  display: inline-grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
+  background: rgba(137, 131, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(137, 131, 255, 0.3);
 }
 
 .beat__title {
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   font-weight: 650;
   letter-spacing: -0.015em;
+  line-height: 1.9rem;
 }
 
 .beat__body {
   color: var(--text-2);
-  line-height: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.45rem;
   text-wrap: pretty;
-}
-
-/* ---- English / Italian: the same row in both languages, zoomed in ---- */
-.lang-strip {
-  margin: 0;
-  display: grid;
-  gap: 0.45rem;
-}
-
-.lang-strip__img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 1.1rem;
-  border: 1px solid var(--line);
-}
-
-.lang-strip__label {
-  color: var(--text-3);
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* PhoneVideo's camera: eases between shots as the clip plays. */
@@ -1357,4 +1379,2812 @@ button:focus-visible {
   transition:
     transform 900ms cubic-bezier(0.65, 0, 0.35, 1),
     transform-origin 900ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* A column that crops a zoomed phone. It reaches into the tile's padding at the sides,
+   so the phone's shadow fades out there instead of stopping at a hard rectangle, and the
+   top and bottom fade too, so the crop reads as intended. */
+.phone-crop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32rem;
+  margin-inline: -1.75rem;
+  overflow: hidden;
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      transparent,
+      #000 1.75rem,
+      #000 calc(100% - 1.75rem),
+      transparent
+    ),
+    linear-gradient(to bottom, transparent, #000 2.5rem, #000 calc(100% - 3.5rem), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent,
+      #000 1.75rem,
+      #000 calc(100% - 1.75rem),
+      transparent
+    ),
+    linear-gradient(to bottom, transparent, #000 2.5rem, #000 calc(100% - 3.5rem), transparent);
+  mask-composite: intersect;
+}
+
+/* ---- Card ranking (rules page) ---- */
+.rank-label {
+  margin-bottom: 0.6rem;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rank-note {
+  margin-top: 0.6rem;
+  color: var(--text-3);
+  font-size: 0.85rem;
+}
+
+.rank-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rank-card {
+  display: inline-grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.1rem;
+  width: 2.4rem;
+  aspect-ratio: 5 / 7;
+  border-radius: 0.4rem;
+  background: #fcfbf8;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+  transition: box-shadow 250ms ease;
+}
+
+.rank-card__r {
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.rank-card[data-win] {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 16px rgb(137 131 255 / 0.55);
+}
+
+.rank-suit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 650;
+  font-size: 0.9rem;
+}
+
+/* on a card-coloured pill, so the black suits read on the dark page */
+.rank-suit__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: #fcfbf8;
+}
+
+.rank-suit__lt {
+  margin: 0 0.25rem;
+  color: var(--text-3);
+}
+
+.rank-duel {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  border-radius: 1.2rem;
+  background: var(--surface-2);
+}
+
+.rank-duel__cards {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.rank-duel__cards .rank-card {
+  width: 3.4rem;
+}
+
+.rank-duel__vs {
+  color: var(--text-3);
+  font-weight: 650;
+}
+
+.rank-duel__why {
+  min-height: 3rem;
+  color: var(--text-2);
+  line-height: 1.5rem;
+}
+
+.rank-duel__next {
+  justify-self: start;
+}
+
+/* ---- Rules: one round from above ---- */
+.round-demo {
+  display: grid;
+  gap: 1rem;
+}
+
+.round-demo__table {
+  position: relative;
+  width: 100%;
+  max-width: 34rem;
+  /* Giulia's name and tally hang below the table edge (more so when zoomed): keep them
+     clear of the caption and its fade */
+  margin: 0 auto 4rem;
+  aspect-ratio: 1;
+}
+
+.round-demo__felt {
+  position: absolute;
+  inset: 17%;
+  border-radius: 28%;
+  background: radial-gradient(circle at 50% 45%, #1f5c3d, #133a27 70%);
+  box-shadow:
+    inset 0 0 0 6px #3b2a1c,
+    inset 0 0 40px rgb(0 0 0 / 0.45),
+    0 24px 60px rgb(0 0 0 / 0.45);
+}
+
+.round-demo__seat {
+  position: absolute;
+  /* above the cards, so a speech bubble is never hidden behind a hand */
+  z-index: 40;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.round-demo__avatar {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--who);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.round-demo__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.round-demo__dealer {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-2, #26262e);
+  color: var(--text-2);
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.round-demo__stats {
+  color: var(--text-3);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-demo__score {
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(248 113 113 / 0.16);
+  color: #fca5a5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* after the "Scoring" label has had its moment */
+  animation: fade-in 300ms ease 1.1s both;
+}
+
+.round-demo__score[data-hit] {
+  background: rgb(52 211 153 / 0.16);
+  color: #6ee7b7;
+}
+
+.round-demo__card {
+  position: absolute;
+  width: 9.5%;
+  aspect-ratio: 5 / 7;
+  perspective: 320px;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  transition:
+    left 700ms cubic-bezier(0.3, 0.7, 0.2, 1),
+    top 700ms cubic-bezier(0.3, 0.7, 0.2, 1),
+    transform 700ms cubic-bezier(0.3, 0.7, 0.2, 1),
+    opacity 400ms ease,
+    aspect-ratio 500ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* one card, two faces: turning it over is a real 3D flip, not a swap */
+.round-demo__flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 0ms);
+}
+
+.round-demo__card[data-back] .round-demo__flip {
+  transform: rotateY(180deg);
+}
+
+.round-demo__face img {
+  /* an image can paint through a turned-away face in 3D: keep it hidden there too */
+  backface-visibility: hidden;
+}
+
+.round-demo__face,
+.round-demo__back {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.35rem;
+  backface-visibility: hidden;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.4);
+}
+
+.round-demo__face {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.1rem;
+  /* real card images are rectangles: the face rounds their corners off */
+  overflow: hidden;
+  background: #fcfbf8;
+  transition: box-shadow 300ms ease;
+}
+
+.round-demo__back {
+  transform: rotateY(180deg);
+  background: repeating-linear-gradient(45deg, #2b3a8f 0 4px, #24317a 4px 8px);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.25),
+    0 2px 6px rgb(0 0 0 / 0.4);
+}
+
+.round-demo__rank {
+  font-size: clamp(0.75rem, 2.6vw, 1rem);
+  font-weight: 750;
+  line-height: 1;
+}
+
+.round-demo__card[data-win] .round-demo__face {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 18px rgb(137 131 255 / 0.6);
+}
+
+/* the camera: pushes in on Giulia's hand while she works out her call */
+/* no crop of its own: a zoom spills past the table and the tile's rounded edge clips it */
+.round-demo__caption,
+.round-demo__controls {
+  position: relative;
+  z-index: 80;
+}
+
+.round-demo__stage {
+  position: absolute;
+  inset: 0;
+  /* the camera (RoundDemo's shots) zooms about a point it sets itself */
+  transform-origin: 0 0;
+}
+
+.round-demo__think {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 30;
+  width: max-content;
+  max-width: 9.5rem; /* narrow enough to clear the legend on its left */
+  /* above the fan, which sits about a fifth of the table above her seat */
+  margin-bottom: 6.6rem;
+  translate: -50% 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 1rem;
+  background: rgb(20 20 26 / 0.92);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 0.62rem;
+  font-style: italic;
+  line-height: 0.95rem;
+  white-space: normal;
+  /* after the "Calling" label has had its moment */
+  animation: says-in 320ms ease 1.1s both;
+}
+
+/* Giulia speaks once she has thought it through */
+.round-demo__says[data-late] {
+  animation-delay: 3.9s;
+}
+
+/* zoomed on Giulia: her words go beside her avatar, clear of the fan */
+.round-demo__says[data-late][data-side="S"] {
+  bottom: auto;
+  top: 0;
+  left: 100%;
+  margin: 0 0 0 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .round-demo__flip {
+    transition: none;
+  }
+}
+
+.round-demo__caption {
+  max-width: 34rem;
+  min-height: 3rem;
+  margin: 0 auto;
+  color: var(--text-2);
+  line-height: 1.5rem;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.round-demo__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.round-demo__btn {
+  display: grid;
+  place-items: center;
+  min-width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2, #26262e);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.round-demo__btn--wide {
+  min-width: 4.2rem;
+}
+
+.round-demo__dots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.round-demo__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.round-demo__dot[aria-current] {
+  background: var(--accent);
+}
+
+.round-demo--compact .round-demo__avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 0.72rem;
+}
+
+/* the homepage snippet: just the table, no names hanging below it */
+.round-demo--compact .round-demo__table {
+  margin-bottom: 0;
+}
+
+/* a new loop: cards fade in where they're held instead of flying back from the piles */
+.round-demo--compact[data-reset] .round-demo__card {
+  transition: opacity 500ms ease 150ms;
+}
+
+.round-demo--compact[data-reset] .round-demo__flip {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .round-demo__card {
+    transition: none;
+  }
+}
+
+.round-demo__round {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* what a player says as they call, from their seat towards the table */
+.round-demo__says {
+  position: absolute;
+  z-index: 30;
+  padding: 0.4rem 0.75rem;
+  border-radius: 1rem;
+  background: #fff;
+  color: #111;
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: nowrap;
+  /* a drop-shadow follows bubble and tail as one outline; box-shadow skipped the tail */
+  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.45));
+  animation: says-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.round-demo__says[data-side="S"] {
+  bottom: 100%;
+  margin-bottom: 0.4rem;
+}
+
+.round-demo__says[data-side="N"] {
+  top: 100%;
+  margin-top: 0.4rem;
+}
+
+.round-demo__says[data-side="W"] {
+  left: 100%;
+  top: 0;
+  margin-left: 0.75rem;
+}
+
+.round-demo__says[data-side="E"] {
+  right: 100%;
+  top: 0;
+  margin-right: 0.75rem;
+}
+
+@keyframes says-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+.round-demo .round-demo__caption {
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 500;
+}
+
+/* ---- Round demo: sketched notes on the winning card ---- */
+.round-demo__sketch {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.round-demo__sketch path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sketch-draw 520ms ease-out 250ms forwards;
+}
+
+.round-demo__sketch .round-demo__sketch-head {
+  opacity: 0;
+  animation-name: head-draw;
+  animation-delay: 700ms;
+  animation-duration: 200ms;
+}
+
+@keyframes sketch-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.round-demo__note {
+  position: absolute;
+  z-index: 51;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 650;
+  font-style: italic;
+  line-height: 1.05rem;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.6);
+  animation: fade-in 300ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .round-demo__sketch path {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* ---- Lock Screen tile: a phone on its Lock Screen ---- */
+.lockscreen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18% 5% 0;
+  background:
+    radial-gradient(120% 70% at 30% 10%, #3b3f9c 0%, transparent 60%),
+    radial-gradient(120% 80% at 80% 90%, #0e6b78 0%, transparent 60%), #0b0d1c;
+}
+
+.lockscreen__date {
+  color: rgb(255 255 255 / 0.85);
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+
+.lockscreen__time {
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.lockscreen__activity {
+  width: 100%;
+  height: auto;
+  margin-top: auto;
+  margin-bottom: 12%;
+  border-radius: 0.9rem;
+}
+
+/* ---- Round demo: the phase, announced big, then parked at the top ---- */
+.round-demo__phase {
+  position: absolute;
+  /* parked top-right, clear of Sofia's seat at the top centre */
+  left: 100%;
+  top: 0;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.35rem;
+  border-radius: 999px;
+  background: rgb(10 10 14 / 0.75);
+  border: 1px solid var(--line);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  translate: -100% 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.round-demo__phase-n {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #0a0a0c;
+  font-size: 0.7rem;
+}
+
+.round-demo__phase[data-intro] {
+  animation: phase-intro 1.5s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+/* starts large in the middle of the table, then settles at the top */
+@keyframes phase-intro {
+  0% {
+    opacity: 0;
+    left: 50%;
+    top: 45%;
+    translate: -50% 0;
+    scale: 1.9;
+  }
+  15%,
+  55% {
+    opacity: 1;
+    left: 50%;
+    top: 45%;
+    translate: -50% 0;
+    scale: 1.9;
+  }
+  100% {
+    opacity: 1;
+    left: 100%;
+    top: 0;
+    translate: -100% 0;
+    scale: 1;
+  }
+}
+
+.round-demo__sketch-outline path {
+  stroke: rgb(0 0 0 / 0.6);
+  stroke-width: 1.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .round-demo__phase[data-intro] {
+    animation: none;
+  }
+}
+
+/* ---- Round demo: the value strip inside Giulia's thought ---- */
+.round-demo__legend {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+  font-style: normal;
+}
+
+.round-demo__legend-label {
+  color: rgb(255 255 255 / 0.4);
+  font-size: 0.42rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.round-demo__legend-row {
+  display: flex;
+  gap: 0.12rem;
+}
+
+.round-demo__legend-card {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  height: 0.95rem;
+  border-radius: 0.15rem;
+  background: rgb(252 251 248 / 0.1);
+  color: rgb(255 255 255 / 0.4);
+  font-size: 0.48rem;
+  font-weight: 700;
+}
+
+.round-demo__legend-card[data-held] {
+  background: #fcfbf8;
+  color: #1d1d1f;
+}
+
+.round-demo__legend-card[data-held="low"] {
+  opacity: 0.8;
+}
+
+.round-demo__legend-card[data-held="top"] {
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 6px rgb(137 131 255 / 0.8);
+}
+
+.round-demo__cables {
+  position: absolute;
+  inset: 0;
+  z-index: 29; /* over the felt and cards, under the thought bubble (30) */
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.round-demo__cables path {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.4);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  /* drawn once the thought bubble has appeared (and the cables have been measured) */
+  animation: sketch-draw 600ms ease-out 1.65s forwards;
+}
+
+.round-demo__cables path[data-top] {
+  stroke: rgb(137 131 255 / 0.9);
+  stroke-width: 1.4;
+}
+
+@keyframes legend-glow {
+  to {
+    box-shadow:
+      0 0 0 2px var(--accent),
+      0 0 22px rgb(137 131 255 / 1);
+  }
+}
+
+/* ---- Round demo: tails on speech bubbles, pointing at whoever is talking ----
+   A clipped triangle in the bubble's own colour, tucked 1px under its edge: no
+   rotated square, so no seam or corner showing. */
+.round-demo__says::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+}
+
+/* The tail's base is tucked well inside the bubble (past its rounded end), so the two
+   read as one shape with no notch where they meet. Narrow, so it points. */
+/* above the seat: tail down */
+.round-demo__says[data-side="S"]::after {
+  left: 50%;
+  bottom: -0.5rem;
+  width: 0.65rem;
+  height: 0.9rem;
+  translate: -50% 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+/* below the seat: tail up */
+.round-demo__says[data-side="N"]::after {
+  left: 50%;
+  top: -0.5rem;
+  width: 0.65rem;
+  height: 0.9rem;
+  translate: -50% 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* right of the seat, and Giulia's beside her avatar: tail left */
+.round-demo__says[data-side="W"]::after,
+.round-demo__says[data-late][data-side="S"]::after {
+  left: -0.5rem;
+  top: 50%;
+  bottom: auto;
+  width: 1.3rem;
+  height: 0.6rem;
+  translate: 0 -50%;
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+
+/* left of the seat: tail right */
+.round-demo__says[data-side="E"]::after {
+  right: -0.5rem;
+  top: 50%;
+  width: 1.3rem;
+  height: 0.6rem;
+  translate: 0 -50%;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* a thought, not a word: two small bubbles trail down to the fan */
+.round-demo__think::before,
+.round-demo__think::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  border-radius: 999px;
+  background: inherit;
+  border: inherit;
+}
+
+.round-demo__think::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  bottom: -0.75rem;
+  translate: -20% 0;
+}
+
+.round-demo__think::after {
+  width: 0.32rem;
+  height: 0.32rem;
+  bottom: -1.25rem;
+  translate: -90% 0;
+}
+
+/* ---- Fades between the zooming table and the tile's title and controls ---- */
+.scrim-top,
+.round-demo__foot {
+  position: relative;
+  z-index: 90;
+}
+
+.scrim-top::before,
+.round-demo__foot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* reaches past the tile padding and well below the header, fading out downwards */
+.scrim-top::before {
+  /* only just past the header: further down it dimmed the round and phase labels */
+  inset: -3rem -3rem -1.2rem;
+  background: linear-gradient(to bottom, var(--tile-solid) 55%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+.round-demo__foot {
+  display: grid;
+  gap: 1rem;
+}
+
+.round-demo__foot::before {
+  inset: -1.6rem -3rem -3rem;
+  background: linear-gradient(to top, var(--tile-solid) 60%, transparent);
+  -webkit-mask-image: linear-gradient(to top, #000 60%, transparent);
+  mask-image: linear-gradient(to top, #000 60%, transparent);
+}
+
+/* the homepage's small round never zooms, so it needs no fade over Giulia's cards */
+.round-demo--compact .round-demo__foot::before {
+  display: none;
+}
+
+/* ---- Round demo: the deal ---- */
+.round-demo__deck {
+  position: absolute;
+  z-index: 20;
+  width: 9.5%;
+  aspect-ratio: 5 / 7;
+  translate: -50% -50%;
+  rotate: -90deg; /* held the way Luca, on the right, holds it */
+  animation: deck-gone 300ms ease var(--gone) forwards;
+}
+
+.round-demo__deck-half {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.35rem;
+  background: repeating-linear-gradient(45deg, #2b3a8f 0 4px, #24317a 4px 8px);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.25),
+    0 3px 0 -1px #1d2766,
+    0 6px 0 -2px #1d2766,
+    0 8px 14px rgb(0 0 0 / 0.45);
+}
+
+@keyframes deck-gone {
+  to {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+/* each card flies from the deck to its owner's hand, in dealing order */
+.round-demo__card[data-deal] {
+  animation: deal-in 480ms cubic-bezier(0.15, 0.75, 0.25, 1) var(--deal-delay)
+    both;
+}
+
+/* tossed: it leaves the deck turning and settles into the fan */
+@keyframes deal-in {
+  from {
+    left: var(--deck-x);
+    top: var(--deck-y);
+    transform: translate(-50%, -50%) rotate(calc(var(--rot) + 160deg))
+      scale(0.92);
+  }
+}
+
+/* ---- Round demo: the scores, spelled out ---- */
+.round-demo__scores {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 65;
+  display: grid;
+  gap: 0.4rem;
+  width: min(92%, 22rem);
+  padding: 0.9rem 1rem;
+  border-radius: 1.1rem;
+  background: rgb(12 12 16 / 0.92);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  translate: -50% -50%;
+  animation: says-in 380ms ease var(--pause, 1.1s) both;
+}
+
+.round-demo__scores-title {
+  color: var(--text-3);
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.round-demo__scores-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  animation: fade-in 350ms ease both;
+}
+
+.round-demo__scores-dot {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--who);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.round-demo__scores-what {
+  color: var(--text-2);
+  font-size: 0.82rem;
+}
+
+.round-demo__scores-what strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.round-demo__scores-what em {
+  color: #fca5a5;
+  font-style: normal;
+}
+
+.round-demo__scores-pts {
+  min-width: 2.6rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(248 113 113 / 0.16);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  font-weight: 750;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-demo__scores-row[data-hit] .round-demo__scores-pts {
+  background: rgb(52 211 153 / 0.16);
+  color: #6ee7b7;
+}
+
+.round-demo__scores-note {
+  margin-top: 0.2rem;
+  color: var(--text-3);
+  font-size: 0.72rem;
+}
+
+/* ---- Round demo: the phase timeline: pills that fill as their phase plays ---- */
+.round-demo__timeline {
+  display: flex;
+  gap: 0.3rem;
+  width: min(100%, 28rem);
+}
+
+.round-demo__phase-btn {
+  position: relative;
+  display: flex;
+  gap: 2px; /* the notches between steps */
+  flex-basis: 0;
+  min-width: 4.4rem;
+  height: 2.1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  color: var(--text-2);
+  font-size: 0.75rem;
+  font-weight: 650;
+  transition: color 300ms ease;
+}
+
+/* the phase playing now: a soft accent edge, drawn over its steps */
+.round-demo__phase-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(137 131 255 / 0);
+  pointer-events: none;
+  transition: box-shadow 400ms ease;
+}
+
+.round-demo__phase-btn[data-current] {
+  color: var(--text);
+}
+
+.round-demo__phase-btn[data-current]::after {
+  box-shadow: inset 0 0 0 1px rgb(137 131 255 / 0.55);
+}
+
+/* one step: a slice of the pill, click to jump there */
+.round-demo__seg {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: background-color 400ms ease;
+}
+
+.round-demo__seg:hover {
+  background: color-mix(in srgb, var(--surface-2) 75%, white);
+}
+
+.round-demo__seg[data-state="done"] {
+  background: rgb(137 131 255 / 0.32);
+}
+
+.round-demo__seg[data-state="done"]:hover {
+  background: rgb(137 131 255 / 0.45);
+}
+
+.round-demo__seg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* the step playing now fills with the clock */
+.round-demo__seg-fill {
+  position: absolute;
+  inset: 0;
+  background: rgb(137 131 255 / 0.32);
+  transform-origin: left;
+  animation-name: seg-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+.round-demo__seg-fill[data-full] {
+  animation: none;
+}
+
+@keyframes seg-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+.round-demo__phase-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .round-demo__card[data-deal],
+  .round-demo__deck,
+  .round-demo__deck-half {
+    animation: none;
+  }
+}
+
+/* who leads this trick: lit, with a pulse while everyone waits for the first card */
+.round-demo__leads {
+  background: var(--accent);
+  color: #0a0a0c;
+  animation: leads-pulse 1.1s ease-in-out 2;
+}
+
+@keyframes leads-pulse {
+  50% {
+    box-shadow: 0 0 0 5px rgb(137 131 255 / 0.3);
+  }
+}
+
+/* ---- Round demo: each player's tally, tricks won / called ---- */
+.round-demo__tally {
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  animation: says-in 320ms ease both;
+}
+
+.round-demo__tally-of {
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* a trick just landed: the count jumps */
+.round-demo__tally[data-bump] {
+  animation: tally-bump 520ms cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+  background: rgb(137 131 255 / 0.35);
+}
+
+@keyframes tally-bump {
+  0% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.45;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.round-demo__tally[data-result="hit"] {
+  background: rgb(52 211 153 / 0.22);
+  color: #6ee7b7;
+}
+
+.round-demo__tally[data-result="miss"] {
+  background: rgb(248 113 113 / 0.2);
+  color: #fca5a5;
+}
+
+/* the lead note shows while the leader is about to play, then gets out of the way */
+.round-demo__lead-note,
+.round-demo__won-note {
+  /* their own layer, above every card: fading them made a stacking context that sat
+     below the cards and hid the arrowheads */
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+}
+
+.round-demo__lead-note {
+  /* read, then cleared away just before the leader's card goes down */
+  animation: lead-note-out 400ms ease 2.3s forwards;
+}
+
+/* the "highest card wins" note clears just before the trick is swept away */
+.round-demo__won-note {
+  animation: lead-note-out 300ms ease 2s forwards;
+}
+
+@keyframes lead-note-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---- Round demo: the called number flies from the bubble into the tally ---- */
+.round-demo__says-n {
+  color: var(--accent-2);
+  font-weight: 800;
+}
+
+.round-demo__fly {
+  position: absolute;
+  z-index: 45;
+  translate: -50% -50%;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-shadow:
+    0 0 12px rgb(137 131 255 / 0.9),
+    0 2px 6px rgb(0 0 0 / 0.6);
+  pointer-events: none;
+  opacity: 0;
+  animation: call-fly 700ms cubic-bezier(0.5, 0, 0.3, 1) 1.6s both;
+}
+
+/* Giulia speaks later (after thinking), so her number leaves later too */
+.round-demo__fly[data-late] {
+  animation-delay: 4.8s;
+}
+
+@keyframes call-fly {
+  0% {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) scale(1.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(var(--fx), var(--fy)) scale(1.6);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* the caller's chip pops in as the number lands */
+.round-demo__tally[data-arrive] {
+  animation: tally-arrive 380ms cubic-bezier(0.2, 0.9, 0.3, 1.4) 2.2s both;
+}
+
+.round-demo__seat:has(.round-demo__fly[data-late])
+  .round-demo__tally[data-arrive] {
+  animation-delay: 5.4s;
+}
+
+@keyframes tally-arrive {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  60% {
+    opacity: 1;
+    scale: 1.3;
+    box-shadow: 0 0 0 4px rgb(137 131 255 / 0.4);
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ---- Round demo: the bubble lets go of its number, then fades ---- */
+.round-demo:not(.round-demo--compact) .round-demo__says {
+  /* gone as its number is plucked: no "I'll take ." left hanging */
+  animation:
+    says-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.3s both,
+    says-out 260ms ease 1.65s forwards;
+}
+
+.round-demo:not(.round-demo--compact) .round-demo__says[data-late] {
+  animation:
+    says-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 3.9s both,
+    says-out 260ms ease 4.85s forwards;
+}
+
+@keyframes says-out {
+  to {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+/* the number's spot empties the moment it's plucked */
+.round-demo:not(.round-demo--compact) .round-demo__says-n {
+  animation: pluck 120ms ease 1.6s forwards;
+}
+
+.round-demo:not(.round-demo--compact)
+  .round-demo__says[data-late]
+  .round-demo__says-n {
+  animation-delay: 4.8s;
+}
+
+@keyframes pluck {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---- Round demo: the tally ticks over as a trick lands in the pile ---- */
+.round-demo__tally-count {
+  position: relative;
+  display: inline-grid;
+}
+
+.round-demo__tally-old,
+.round-demo__tally-new {
+  grid-area: 1 / 1;
+}
+
+.round-demo__tally-old {
+  animation: tick-out 260ms ease 2.85s forwards;
+}
+
+.round-demo__tally-new {
+  opacity: 0;
+  animation: tick-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.3) 2.95s forwards;
+}
+
+@keyframes tick-out {
+  to {
+    opacity: 0;
+    translate: 0 -0.5rem;
+  }
+}
+
+@keyframes tick-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.round-demo__plus {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  color: var(--accent-2);
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 0;
+  translate: -50% 0;
+  animation: plus-up 1s ease 2.9s forwards;
+}
+
+@keyframes plus-up {
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: -50% -1.2rem;
+  }
+}
+
+/* the bump lands with the sweep, not before it */
+.round-demo__tally[data-bump] {
+  animation-delay: 2.9s;
+}
+
+/* ---- Round demo: paused shows the step finished ----
+   CSS can freeze animations but not transitions, so freezing mid-step left cards sliding
+   while flips and notes stood still. Instead, a pause settles the step: everything
+   jumps to where the step ends, and the step's notes are shown in full to read. */
+.round-demo[data-paused] *,
+.round-demo[data-paused] *::before,
+.round-demo[data-paused] *::after {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+.round-demo[data-paused]
+  :is(.round-demo__lead-note, .round-demo__won-note, .round-demo__deal-note) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+.round-demo[data-paused] .round-demo__sketch path {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.round-demo__paused {
+  position: absolute;
+  /* under the phase label, clear of Sofia's seat */
+  left: auto;
+  right: 0;
+  top: 2.6rem;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(10 10 14 / 0.8);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.round-demo__btn--wide {
+  display: inline-flex;
+  gap: 0.4rem;
+  padding: 0 0.9rem;
+}
+
+/* ---- Round demo: the end card ---- */
+.round-demo__end {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 75;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  width: min(90%, 21rem);
+  padding: 1.2rem 1.1rem;
+  border-radius: 1.2rem;
+  background: rgb(12 12 16 / 0.94);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  text-align: center;
+  translate: -50% -50%;
+  animation: says-in 420ms ease 2.4s both;
+}
+
+.round-demo__end-title {
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.round-demo__end-sub {
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+.round-demo__end-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.round-demo__end-link {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.round-demo__end-link:hover {
+  background: rgb(137 131 255 / 0.25);
+}
+
+.round-demo__end-replay {
+  margin-top: 0.2rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #0a0a0c;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ---- Round demo: the score sheet ---- */
+.round-demo__scores {
+  width: min(94%, 24rem);
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+}
+
+.round-demo__scores-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  column-gap: 0.9rem;
+  row-gap: 0.45rem;
+}
+
+.round-demo__scores-row {
+  display: contents;
+}
+
+.round-demo__scores-row > * {
+  animation: fade-in 380ms ease both;
+  animation-delay: inherit;
+}
+
+.round-demo__scores-head {
+  color: var(--text-3);
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.round-demo__scores-who {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+}
+
+.round-demo__scores-who > span:last-child {
+  display: grid;
+  line-height: 1.15;
+}
+
+.round-demo__scores-who em {
+  color: #fca5a5;
+  font-size: 0.7rem;
+  font-style: normal;
+}
+
+.round-demo__scores-n {
+  position: relative;
+  min-width: 1.6rem;
+  font-size: 1rem;
+  font-weight: 750;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-demo__scores-mark {
+  position: absolute;
+  left: 100%;
+  top: -0.2rem;
+  font-size: 0.65rem;
+  color: #fca5a5;
+}
+
+.round-demo__scores-row[data-hit] .round-demo__scores-mark {
+  color: #6ee7b7;
+}
+
+/* ---- Round demo: classic card faces ---- */
+.round-demo__face[data-classic] {
+  display: block;
+  container-type: inline-size;
+}
+
+.classic {
+  position: absolute;
+  inset: 0;
+}
+
+/* the corner index keeps to a narrow strip (4% to 22% of the width), clear of the
+   pips' side columns */
+.classic__corner {
+  position: absolute;
+  left: 4%;
+  top: 4%;
+  display: grid;
+  justify-items: center;
+  width: 18%;
+  line-height: 1;
+}
+
+.classic__corner[data-flip] {
+  left: auto;
+  top: auto;
+  right: 4%;
+  bottom: 4%;
+  rotate: 180deg;
+}
+
+.classic__idx {
+  font-size: 17cqw;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.classic__idx[data-wide] {
+  letter-spacing: -0.1em;
+  translate: -0.05em 0;
+}
+
+.classic__pip {
+  position: absolute;
+  display: block;
+  /* smaller on the 8, 9 and 10, set per card */
+  width: var(--pip, 22cqw);
+  height: var(--pip, 22cqw);
+  translate: -50% -50%;
+}
+
+.classic__pip[data-flip] {
+  rotate: 180deg;
+}
+
+.classic__pip svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.classic__pip--corner {
+  position: static;
+  width: 12cqw;
+  height: 12cqw;
+  translate: none;
+  margin-top: 2cqw;
+}
+
+.classic__pip--ace {
+  width: 46cqw;
+  height: 46cqw;
+}
+
+.classic__court {
+  position: absolute;
+  inset: 20% 22%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4cqw;
+  border-radius: 4cqw;
+  border: 1px solid currentColor;
+  background: rgb(0 0 0 / 0.03);
+  font-size: 30cqw;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.classic__pip--court {
+  position: static;
+  width: 22cqw;
+  height: 22cqw;
+  translate: none;
+}
+
+/* the Simple / Classic switch, top-left under the round label */
+.round-demo__faces {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 60;
+  scale: 0.8;
+  transform-origin: left bottom;
+}
+
+/* ---- Italian card faces (ported from the app's Rules tab) ---- */
+.itf {
+  position: absolute;
+  inset: 0;
+  background: #fffef5;
+  border-radius: inherit;
+}
+
+.itf__inner {
+  position: absolute;
+  inset: 4.5cqw;
+  border: 1px solid rgb(153 153 153 / 0.6);
+  border-radius: 3cqw;
+}
+
+.itf__pip {
+  display: block;
+}
+
+.itf__pip svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.itf__pip--abs {
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.itf__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.itf__center > * {
+  grid-area: 1 / 1;
+}
+
+.itf__ring {
+  width: 80cqw;
+  height: 80cqw;
+  border: 1px dashed;
+  border-radius: 999px;
+  opacity: 0.3;
+}
+
+.itf__court {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8cqw;
+}
+
+.itf__figure {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 65cqw;
+  height: 65cqw;
+}
+
+.itf__figure > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.itf__crown {
+  position: absolute;
+  top: -12cqw;
+  left: 50%;
+  width: 23cqw !important;
+  height: 23cqw !important;
+  translate: -50% 0;
+}
+
+/* ---- Round demo: the HUD, fixed over the table while the stage zooms ---- */
+.round-demo__hud {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+
+.round-demo__hud .round-demo__end {
+  pointer-events: auto;
+}
+
+/* the first trick's note waits for the "Playing" label to settle */
+.round-demo__lead-note[data-first] {
+  animation:
+    fade-in 300ms ease 1.1s both,
+    lead-note-out 400ms ease 3.4s forwards;
+}
+
+/* after the deal: shows once the last card is down */
+.round-demo__deal-note {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  animation: fade-in 400ms ease var(--deal-note-at, 4.6s) both;
+}
+
+/* ---- Round demo: one card-style control with previews ---- */
+.style-pick {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  background: var(--surface-2);
+}
+
+.style-pick__btn {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.3rem 0.45rem 0.25rem;
+  border-radius: 0.75rem;
+  color: var(--text-3);
+  font-size: 0.62rem;
+  font-weight: 650;
+}
+
+.style-pick__btn[aria-pressed="true"] {
+  background: rgb(137 131 255 / 0.22);
+  box-shadow: inset 0 0 0 1px rgb(137 131 255 / 0.6);
+  color: var(--text);
+}
+
+.style-pick__card {
+  position: relative;
+  display: block;
+  width: 1.7rem;
+  aspect-ratio: 5 / 7;
+}
+
+.style-pick__card .round-demo__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.2rem;
+  backface-visibility: visible;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+.style-pick__rank {
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.style-pick__label {
+  display: grid;
+  justify-items: center;
+  line-height: 1.15;
+}
+
+.style-pick__sub {
+  color: var(--text-3);
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+
+/* ---- Round demo on a phone: fit the screen ---- */
+.round-demo {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 639px) {
+  /* the style picker drops below the title and shrinks to fit */
+  .style-pick {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .style-pick__btn {
+    flex: 1;
+    padding-inline: 0.2rem;
+  }
+
+  /* names, tallies and bubbles a size down so the four seats fit a phone-width table */
+  .round-demo__avatar {
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.72rem;
+  }
+
+  .round-demo__name {
+    font-size: 0.7rem;
+  }
+
+  .round-demo__tally {
+    font-size: 0.8rem;
+  }
+
+  .round-demo__says {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .round-demo__think {
+    max-width: 7.5rem;
+    font-size: 0.55rem;
+    line-height: 0.8rem;
+  }
+
+  .round-demo__note {
+    font-size: 0.6rem;
+    line-height: 0.85rem;
+  }
+
+  .round-demo__scores {
+    padding: 0.7rem;
+  }
+
+  .round-demo__scores-who {
+    font-size: 0.75rem;
+  }
+
+  .round-demo__phase-btn {
+    /* the one-step Dealing pill still fits its name */
+    min-width: 3.5rem;
+    font-size: 0.65rem;
+  }
+
+  /* phones: the timeline gets a row of its own, the buttons sit under it */
+  .round-demo__timeline {
+    order: -1;
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .round-demo__controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---- Round demo: scoring, one player at a time ---- */
+.round-demo__callout {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  min-width: 13rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 1.1rem;
+  background: rgb(12 12 16 / 0.92);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+  text-align: center;
+  translate: -50% -50%;
+  animation: says-in 380ms ease both;
+}
+
+.round-demo__callout-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.round-demo__callout-line {
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+.round-demo__callout-line strong {
+  color: var(--text);
+}
+
+.round-demo__callout-sum {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-demo__callout-sum strong {
+  color: #fca5a5;
+}
+
+.round-demo__callout[data-hit] .round-demo__callout-sum strong {
+  color: #6ee7b7;
+}
+
+.round-demo__callout-sum em {
+  color: var(--text-3);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+/* ---- Round demo: why Luca can't say 1 ---- */
+.round-demo__forced-note {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  animation: fade-in 400ms ease 0.2s both;
+}
+
+/* ---- Round demo: the Next button counts down to the next step ---- */
+.round-demo__btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.round-demo__btn > svg:not(.round-demo__ring) {
+  position: relative;
+}
+
+/* the ring round Next: it closes as the step runs out */
+.round-demo__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+  pointer-events: none;
+}
+
+.round-demo__ring circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation-name: ring;
+  animation-duration: inherit;
+  animation-play-state: inherit;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+.round-demo__ring[data-full] circle {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+
+@keyframes ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.round-demo__next {
+  width: 2.4rem;
+  padding: 0;
+}
+
+/* ---- Rules: the cards, in four modes ---- */
+.deck-grid {
+  display: grid;
+  /* never wider than the page: wide rows scroll inside themselves */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 4rem;
+}
+
+.deck-grid__controls .style-pick {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.deck-grid__body {
+  min-height: 3rem;
+  max-width: 38rem;
+  margin-top: 0.5rem;
+  color: var(--text-2);
+  line-height: 1.5rem;
+}
+
+/* one row that never reflows when the deck changes */
+.deck-grid__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* the 52-card note: a line of its own that opens under the controls (rows 0fr to
+   1fr, the row gap folded away while shut), so nothing below jumps */
+.deck-grid__caveat {
+  display: grid;
+  flex-basis: 100%;
+  grid-template-rows: 0fr;
+  margin-top: -0.6rem;
+  opacity: 0;
+  transition:
+    grid-template-rows 420ms cubic-bezier(0.65, 0, 0.35, 1),
+    margin-top 420ms cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 220ms ease;
+}
+
+.deck-grid__caveat[data-show] {
+  grid-template-rows: 1fr;
+  margin-top: 0;
+  opacity: 1;
+  transition:
+    grid-template-rows 420ms cubic-bezier(0.65, 0, 0.35, 1),
+    margin-top 420ms cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 360ms ease 160ms;
+}
+
+.deck-grid__caveat p {
+  min-height: 0;
+  max-width: 34rem;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  line-height: 1.3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-grid__caveat,
+  .deck-grid__caveat[data-show] {
+    transition: none;
+  }
+}
+
+.deck-grid__modes {
+  justify-self: start;
+}
+
+.deck-grid__stage {
+  position: relative;
+  min-height: 22rem;
+}
+
+/* leaving cards fade out here, where they were */
+.deck-grid__ghosts {
+  position: absolute;
+  inset: 0;
+  /* a card that leaves from far along a scrolled row would widen the page as it goes */
+  overflow-x: clip;
+  pointer-events: none;
+}
+
+/* before it first scrolls into view: the cards wait to be dealt in, the rest to rise */
+.deck-grid[data-pending] :is(.deck-grid__card, .deck-grid__lt) {
+  opacity: 0;
+}
+
+.deck-grid > :not(.deck-grid__stage) {
+  transition:
+    opacity 600ms ease,
+    translate 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deck-grid > :nth-child(2) {
+  transition-delay: 80ms;
+}
+
+.deck-grid > :nth-child(3) {
+  transition-delay: 160ms;
+}
+
+.deck-grid[data-pending] > :not(.deck-grid__stage) {
+  opacity: 0;
+  translate: 0 12px;
+}
+
+/* a mode's heading and words cross in with it */
+.deck-grid__title,
+.deck-grid__body {
+  animation: words-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.deck-grid__body {
+  animation-delay: 60ms;
+}
+
+@keyframes words-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-grid__title,
+  .deck-grid__body,
+  .deck-grid__lt {
+    animation: none;
+  }
+}
+
+/* a phone scrolls the full deck sideways rather than squashing 13 columns */
+.deck-grid__scroll {
+  padding: 0.6rem 0.4rem;
+  margin: -0.6rem -0.4rem;
+}
+
+/* phones only: wide rows scroll sideways, with no bar to flash up as cards move */
+@media (max-width: 639px) {
+  .deck-grid__scroll,
+  .deck-grid__chain {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .deck-grid__scroll::-webkit-scrollbar,
+  .deck-grid__chain::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* hand-drawn names over the court and ace columns: a word, and a short arrow down */
+.deck-grid__labels {
+  display: grid;
+  gap: 0.45rem;
+  height: 2.9rem;
+  min-width: max-content;
+  margin-bottom: 0.1rem;
+}
+
+/* the row under the deck, for the strongest card's note */
+.deck-grid__foot {
+  margin: 0.1rem 0 0;
+}
+
+@media (min-width: 640px) {
+  .deck-grid__labels {
+    min-width: 0;
+  }
+}
+
+.deck-grid__label-cell {
+  position: relative;
+}
+
+/* centred on its column: the arrow's tip lands on the column's middle */
+.deck-grid__label {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--text-2);
+  translate: -50% 0;
+  pointer-events: none;
+  /* the word first, then the pen draws the arrow */
+  --pen: calc(var(--d) + 220ms);
+}
+
+.deck-grid__label-text,
+.deck-grid__corner > span,
+.deck-grid__end span {
+  font-size: 0.78rem;
+  font-weight: 650;
+  font-style: italic;
+  line-height: 1;
+  white-space: nowrap;
+  rotate: -3deg;
+  animation: fade-in 360ms ease var(--d) both;
+}
+
+/* the weakest and strongest cards of all: a note over the first card, its words
+   running on over the deck's top edge, and one under the last, running back left */
+.deck-grid__corner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--text-2);
+  pointer-events: none;
+  --pen: calc(var(--d) + 220ms);
+}
+
+.deck-grid__corner > span {
+  align-self: flex-start;
+}
+
+.deck-grid__corner[data-corner="strong"] {
+  top: 0;
+  bottom: auto;
+}
+
+.deck-grid__corner[data-corner="strong"] > span {
+  align-self: flex-end;
+}
+
+/* points up, curling in from the words on its left */
+.deck-grid__corner[data-corner="strong"] .deck-grid__pen {
+  scale: -1 -1;
+}
+
+/* every other arrow curls the other way, as a hand would vary it */
+.deck-grid__label[data-alt] .deck-grid__pen {
+  scale: -1 1;
+}
+
+/* the pen: each stroke draws in from its start. Its dash is parked wholly before the
+   path (not at its edge), so not even a round cap's dot shows before it starts */
+.deck-grid__pen {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+
+.deck-grid__pen path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.01;
+  animation: pen-draw 380ms cubic-bezier(0.45, 0, 0.25, 1) var(--pen, 0ms) both;
+}
+
+/* the head, once the shaft is down */
+.deck-grid__pen path + path {
+  animation-duration: 200ms;
+  animation-delay: calc(var(--pen, 0ms) + 360ms);
+}
+
+@keyframes pen-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* the round demo's sketched notes draw their heads with this */
+@keyframes head-draw {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-grid__label-text,
+  .deck-grid__end,
+  .deck-grid__end span,
+  .deck-grid__pen path {
+    animation: none;
+    transition: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.deck-grid__board {
+  display: grid;
+  gap: 0.45rem;
+  min-width: max-content;
+}
+
+@media (min-width: 640px) {
+  .deck-grid__board {
+    min-width: 0;
+  }
+}
+
+.deck-grid__card {
+  position: relative;
+  aspect-ratio: 5 / 7;
+  /* the blank card: it stays while one style's face fades out and the next fades in */
+  border-radius: 0.35rem;
+  background: #fdfdfc;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+  transition: opacity 300ms ease;
+}
+
+/* Italian cards are narrower than poker ones (the real Piacentine are 360 x 580). All
+   the Italian styles share that shape, so only a change of deck reshapes the cards */
+.deck-grid[data-deck="italian"] .deck-grid__card {
+  aspect-ratio: 360 / 580;
+}
+
+/* the grid fades faces itself (in waves): the faces' own fade-in would replay every
+   time a card moves to a new row, blanking it mid-glide */
+.deck-grid__card .round-demo__face[data-style] {
+  animation: none;
+}
+
+.deck-grid__card .round-demo__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 0.35rem;
+}
+
+/* Value and Suit: one row of cards with "<" between them */
+.deck-grid__chain {
+  display: flex;
+  align-items: center;
+  /* safe: a row wider than a phone scrolls from its first card, not from mid-row */
+  justify-content: safe center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.2rem;
+}
+
+/* shrinks to fit the row, but never below a readable size: on a phone it scrolls */
+.deck-grid__chain .deck-grid__card {
+  min-width: 2.6rem;
+  width: clamp(2.6rem, calc((100vw - 6rem) / (var(--n) * 1.45)), 5.4rem);
+}
+
+.deck-grid__chain {
+  position: relative;
+  /* room for the "weakest" and "strongest" notes */
+  padding-block: 3rem;
+}
+
+/* "weakest" under the first card and "strongest" over the last, drawn like the column
+   names: the arrow on the card's centre line, the word nudged in at the row's edges */
+.deck-grid__end {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--text-2);
+  pointer-events: none;
+  translate: -50% 0.3rem;
+  /* follows its card when a new deck moves it */
+  transition:
+    left 600ms cubic-bezier(0.65, 0, 0.35, 1),
+    top 600ms cubic-bezier(0.65, 0, 0.35, 1);
+  --d: 420ms;
+  --pen: 600ms;
+}
+
+.deck-grid__end span {
+  translate: var(--nudge, 0) 0;
+}
+
+/* under the card, pointing up at it */
+.deck-grid__end[data-end="weak"] .deck-grid__pen {
+  scale: 1 -1;
+}
+
+/* over the card, pointing down at it, a beat after the first */
+.deck-grid__end[data-end="strong"] {
+  translate: -50% calc(-100% - 0.3rem);
+  --d: 820ms;
+  --pen: 1000ms;
+}
+
+/* small enough that the four still fit a phone's width */
+.deck-grid__chain--big .deck-grid__card {
+  width: clamp(4rem, 16vw, 8.5rem);
+}
+
+.deck-grid__lt {
+  color: var(--text-3);
+  font-size: 1.2rem;
+  font-weight: 700;
+  /* each "<" arrives after the cards either side of it */
+  animation: fade-in 320ms ease var(--d, 0ms) both;
+}
+
+/* Compare: two cards side by side. The winner steps forward under a "Wins" tag, the
+   loser sinks back, and the fact that settled it (value or suit) is marked under both */
+.deck-grid__compare {
+  display: grid;
+  justify-items: center;
+  gap: 1.2rem;
+  padding-top: 0.25rem;
+}
+
+.deck-grid__duel {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 4vw, 2.2rem);
+}
+
+.deck-grid__side {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.deck-grid__duel .deck-grid__card {
+  width: clamp(6.5rem, 26vw, 10rem);
+}
+
+/* lift, sink and fade run once the new pair has turned over */
+.deck-grid__card[data-pair] {
+  transition:
+    opacity 420ms ease 300ms,
+    scale 520ms cubic-bezier(0.22, 1, 0.36, 1) 300ms,
+    translate 520ms cubic-bezier(0.22, 1, 0.36, 1) 300ms,
+    box-shadow 420ms ease 300ms;
+}
+
+.deck-grid__card[data-pair="lose"] {
+  opacity: 0.45;
+  scale: 0.93;
+}
+
+.deck-grid__card[data-pair="win"] {
+  translate: 0 -0.4rem;
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 18px 34px rgb(0 0 0 / 0.5);
+}
+
+/* both sides keep the tag's room, so the cards stay level */
+.deck-grid__verdict {
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #0a0a0c;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  visibility: hidden;
+}
+
+.deck-grid__side[data-win] .deck-grid__verdict {
+  visibility: visible;
+  animation: verdict-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 560ms both;
+}
+
+@keyframes verdict-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+    scale: 0.9;
+  }
+}
+
+/* value and suit under each card: the one that decided it, marked on both */
+.deck-grid__facts {
+  display: flex;
+  /* re-keyed per pair: arrives once the cards have turned */
+  animation: words-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 380ms both;
+  gap: 0.6rem;
+  color: var(--text-3);
+  font-size: 0.8rem;
+  line-height: 1.2rem;
+  white-space: nowrap;
+}
+
+/* a quiet dot between value and suit */
+.deck-grid__facts > span + span::before {
+  content: "·";
+  margin-right: 0.6rem;
+  color: var(--text-3);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.deck-grid__facts [data-key] {
+  color: var(--text);
+  font-weight: 650;
+  text-decoration: underline 2px var(--accent);
+  text-underline-offset: 4px;
+}
+
+.deck-grid__vs {
+  color: var(--text-3);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.deck-grid__reason {
+  max-width: 30rem;
+  color: var(--text-2);
+  text-align: center;
+  animation: words-in 420ms cubic-bezier(0.22, 1, 0.36, 1) 480ms both;
+}
+
+.deck-grid__reason b {
+  color: var(--text);
+  font-weight: 650;
+}
+
+/* a quiet pill: the pair turns over in place */
+.deck-grid__another {
+  padding-inline: 1.1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  transition:
+    color 200ms ease,
+    background 200ms ease;
+}
+
+.deck-grid__another:hover {
+  background: var(--surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-grid__card[data-pair] {
+    transition: none;
+  }
+
+  .deck-grid__side[data-win] .deck-grid__verdict,
+  .deck-grid__facts,
+  .deck-grid__reason {
+    animation: none;
+  }
+}
+
+/* ---- Card faces: real and simple ---- */
+.real-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* style switches fade instead of snapping (the face is re-keyed on style) */
+.round-demo__face[data-style] {
+  animation: fade-in 280ms ease both;
+}
+
+.round-demo__face[data-style="simple"] {
+  container-type: inline-size;
+  display: block;
+  background: #fcfbf8;
+}
+
+.simple-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4cqw;
+}
+
+/* the Italian Fante, Cavallo and Re: the figure, large and faint, behind the letter */
+.simple-face__figure {
+  position: absolute;
+  inset: 6%;
+  display: grid;
+  place-items: center;
+  opacity: 0.13;
+}
+
+.simple-face__figure svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.simple-face__rank,
+.simple-face__suit {
+  position: relative;
+}
+
+/* the Asso: one big suit sign */
+.simple-face__ace {
+  display: block;
+  width: 64cqw;
+  height: 64cqw;
+}
+
+.simple-face__ace svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* the round demo deals Italian cards in their own, narrower shape too: the real
+   images fill it exactly, the face rounding off their corners */
+.round-demo[data-deck="italian"] .round-demo__card {
+  aspect-ratio: 360 / 580;
+}
+
+.simple-face__rank {
+  font-size: 34cqw;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.simple-face__suit {
+  display: block;
+  width: 30cqw;
+  height: 30cqw;
+}
+
+.simple-face__suit svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================
+   Hero (headline, kicker, CTA) and the paper score sheet
+   ========================================= */
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.hero-kicker::before {
+  content: "";
+  width: 1.4rem;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.8;
+}
+
+.hero-title {
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.hero-lede {
+  font-size: 1.12rem;
+  line-height: 1.75rem;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.hero-cta__note {
+  font-size: 0.875rem;
+  color: var(--text-3);
+}
+
+/* ---- Story page (/story) ---- */
+/* A vertical rule with a dot per milestone; the dates sit above each title. */
+.story-timeline {
+  position: relative;
+  list-style: none;
+  margin-top: 3.5rem;
+  padding-left: 1.75rem;
+}
+
+.story-timeline::before {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 1px;
+  background: var(--line);
+}
+
+.story-step {
+  position: relative;
+}
+
+.story-step + .story-step {
+  margin-top: 3.5rem;
+}
+
+.story-step::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.75rem + 0.3rem - 0.3rem);
+  top: 0.32rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+
+.story-step__date {
+  @apply text-[0.8rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent)];
+  font-variant-numeric: tabular-nums;
+}
+
+.story-step__body {
+  @apply mt-4 space-y-5 leading-7 text-[var(--text-2)];
+  max-width: 40rem;
+}
+
+.story-figure {
+  margin: 1.75rem 0;
+}
+
+.story-figure__shots {
+  display: grid;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+/* two tall shots side by side, even on a phone */
+.story-figure__shots--phone {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* photos: stacked on a phone, side by side from tablet up */
+@media (min-width: 640px) {
+  .story-figure__shots--pair {
+    grid-template-columns: 0.8fr 1.2fr;
+    align-items: stretch;
+  }
+
+  .story-figure__shots--pair .story-shot {
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.story-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+  outline: 1px solid var(--line-soft);
+  outline-offset: -1px;
+}
+
+.story-figure__caption {
+  @apply mt-3 text-sm leading-6 text-[var(--text-3)];
+}
+
+/* placeholders the owner still has to fill in: loud on purpose */
+.story-todo {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border: 1px dashed #e0b341;
+  border-radius: 0.4rem;
+  color: #e0b341;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
