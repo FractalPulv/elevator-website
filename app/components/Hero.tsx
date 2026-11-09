@@ -15,9 +15,8 @@ export function Hero() {
           <span className="accent-text whitespace-nowrap">pen and paper</span>
         </h1>
         <p className="lede hero-lede mt-6 max-w-[29rem]">
-          One phone keeps score for the whole table. Each prediction is locked
-          in the moment it&rsquo;s said, so nobody can change their call later,
-          and the app adds up every round.
+          One phone keeps score for the whole table. It locks in each prediction
+          when it&rsquo;s said and adds up every round.
         </p>
         <div className="hero-cta mt-9">
           <StoreButtons />

@@ -58,7 +58,7 @@ const say = (
 const steps: Step[] = [
   {
     title: "Predict",
-    body: "Each player says how many they'll take. Tap it in and lock it: from then on it's on record.",
+    body: "Each player says how many they'll take. Tap it in and lock it.",
     src: "/clips/predict.mp4",
     label: "Giulia's call of 2 is entered and locked",
     tilt: "right",
@@ -66,7 +66,7 @@ const steps: Step[] = [
   },
   {
     title: "Score",
-    body: "Tap in each one as it's won. Hit your prediction exactly and you score; miss, and you don't. The totals and stats keep up as you play.",
+    body: "Tap in each win as it happens. Get your prediction exactly right and you score. The totals update as you go.",
     src: "/clips/score.mp4",
     label: "Each player's wins are entered and the round's points appear",
     tilt: "left",
@@ -78,11 +78,11 @@ const steps: Step[] = [
 const beats = [
   {
     title: "Gather the players",
-    body: "Three to six of you around one table, and one deck: a 40-card Italian deck or an ordinary poker deck.",
+    body: "Three to six players and one deck: a 40-card Italian deck or a normal poker deck.",
   },
   {
     title: "Learn the rules",
-    body: "Each round deals one more card than the last, up to the top floor and back down. Everyone predicts how many they\u2019ll take, then you play it out. The Rules tab in the app walks you through it.",
+    body: "Each round deals one more card than the last, up to a peak and back down. Everyone predicts how many they\u2019ll take, then you play. The Rules tab in the app explains it.",
   },
   {
     title: "Play",
@@ -96,13 +96,13 @@ const landscapeShots = [
     src: "/screenshots/landscape-predict.webp",
     alt: "Landscape prediction focus mode: Luca can't call 2",
     caption:
-      "Predictions go in one player at a time, with nothing else on screen to get in the way.",
+      "Predictions go in one player at a time.",
   },
   {
     src: "/screenshots/landscape-score.webp",
     alt: "Landscape scoring grid with points for each player",
     caption:
-      "Tap a player's card for each one they take. The points land as soon as the round is in.",
+      "Tap a player's card for each one they take. The points appear when the round is done.",
   },
 ];
 
@@ -194,8 +194,7 @@ export default function Home() {
                   </h2>
                 </div>
                 <p className="lede max-w-md lg:pb-1">
-                  Elevator is played face to face, with real cards. It takes a
-                  round to learn and a whole evening to stop playing.
+                  Elevator is played at a real table with a real deck. Most people get the hang of it after a round or two.
                 </p>
               </Reveal>
               <div className="mt-12 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
@@ -229,9 +228,7 @@ export default function Home() {
                   Every prediction, on record
                 </h2>
                 <p className="lede mt-6 max-w-md">
-                  Round the table, a prediction used to be a promise. Now
-                  it&rsquo;s locked in, so nobody can say they called something
-                  else.
+                  Without the app, a prediction is only something someone said. Once it&rsquo;s locked in, nobody can claim they called something else.
                 </p>
               </Reveal>
               <Reveal delay={0.05}>
@@ -249,8 +246,7 @@ export default function Home() {
                   Turn it sideways
                 </h2>
                 <p className="lede mt-6">
-                  Turn the phone and the scoreboard switches to focus mode: one
-                  player and one decision at a time, and nothing else on screen.
+                  Turn the phone sideways for focus mode. It shows one player at a time and hides everything else.
                 </p>
               </Reveal>
 
@@ -293,9 +289,7 @@ export default function Home() {
                   <div className="flex flex-col sm:w-1/2">
                     <h3 className="tile__title">See the game unfold</h3>
                     <p className="tile__body">
-                      Who&rsquo;s climbing, who&rsquo;s slipping, and by how
-                      much. Hold a finger on the chart to see the standings
-                      after any round.
+                      See who&rsquo;s ahead after every round. Hold a finger on the chart to check the standings at any point.
                     </p>
                     <ul className="mt-8 grid gap-4 sm:mt-auto">
                       {chartPoints.map(({ Icon, label }) => (
@@ -444,9 +438,7 @@ export default function Home() {
                   <div>
                     <h3 className="tile__title">New to Elevator?</h3>
                     <p className="tile__body">
-                      Predict how many you&rsquo;ll take, then take exactly that
-                      many. The rules page walks through a whole round, one step
-                      at a time. They&rsquo;re in the app too.
+                      Predict how many you&rsquo;ll take, then take exactly that many. The rules page walks through a full round, and the rules are in the app too.
                     </p>
                     <Link href="/rules" className="btn btn--primary mt-6">
                       How to play
@@ -476,9 +468,7 @@ export default function Home() {
                     Bigger tables. Live scores.
                   </h2>
                   <p className="lede mt-6 max-w-md">
-                    Scoring, match history and stats are free for everyone. Pro
-                    is a one-time unlock for bigger games and for a table where
-                    everyone can see the score.
+                    Scoring, history and stats are free. Pro is a one-time purchase for games with five or six players and for following the score on every phone.
                   </p>
                 </Reveal>
                 <Reveal delay={0.05}>
@@ -502,10 +492,7 @@ export default function Home() {
                   <div>
                     <h3 className="tile__title">The score on every phone</h3>
                     <p className="tile__body">
-                      Everyone wants to check the score and the chart, and that
-                      used to mean passing the one phone around the table. Share
-                      a four-letter room code and each player follows every call
-                      and every point live on their own phone.
+                      Everyone wants to check the score, which used to mean passing one phone around. Share a four-letter room code and everyone can follow the game on their own phone.
                     </p>
                   </div>
                   {/* the camera pushes in on the whole phone; this column crops it with soft
@@ -552,9 +539,7 @@ export default function Home() {
                   <div>
                     <h3 className="tile__title">Six at the table</h3>
                     <p className="tile__body">
-                      Seat up to six. With 40 cards to share, the elevator tops
-                      out at six cards each, and the scoring grid makes room for
-                      everyone.
+                      Play with up to six. With 40 cards that means six cards each at the top, and the scoring grid fits everyone.
                     </p>
                   </div>
                   <div className="flex items-center justify-center gap-6">
@@ -578,8 +563,7 @@ export default function Home() {
                 <Reveal delay={0.15} className="tile flex flex-col !p-6">
                   <h3 className="tile__title">Support indie development</h3>
                   <p className="tile__body">
-                    Elevator Scoreboard is made by one person, not a studio. No
-                    ads, no subscription: Pro is what keeps it going.
+                    Elevator Scoreboard is made by one person. There are no ads and no subscription, so buying Pro is what keeps it going.
                   </p>
                   <Link href="/story" className="btn btn--primary mt-6 self-start">
                     Read the story
