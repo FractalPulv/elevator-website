@@ -13,17 +13,8 @@ const players = [
   { name: "Paolo", color: "#06b6d4" },
 ];
 
-// Fixed "random" tilt and nudge per card, so it looks thrown but never jitters between renders.
-const toss = [
-  { r: -17, dx: 0.4, dy: -0.3 },
-  { r: 23, dx: -0.5, dy: 0.2 },
-  { r: -6, dx: 0.3, dy: 0.5 },
-  { r: 31, dx: -0.2, dy: -0.4 },
-  { r: -28, dx: 0.5, dy: 0.1 },
-  { r: 12, dx: -0.4, dy: -0.2 },
-];
-
-const ROUND_MS = 2200;
+const ROUND_MS = 2800; // one deal, then a moment to look at it
+const COLLECT_MS = 280; // the old hands fade before the next deal
 
 const notes: Record<number, string> = {
   3: "Works with three.",
@@ -40,34 +31,33 @@ function floorsFor(count: number) {
   return [...up, ...up.slice().reverse()];
 }
 
-// Seat i of n on the table's ellipse, starting at the front (bottom) and going clockwise.
-function seat(i: number, n: number) {
-  const a = Math.PI / 2 + (i * 2 * Math.PI) / n;
-  const x = Math.cos(a);
-  const y = Math.sin(a);
-  return { x, y, depth: (y + 1) / 2 }; // depth 0 = far side, 1 = nearest
+/** Same hand size and direction of travel when the table grows or shrinks. */
+function sameFloor(round: number, from: number, to: number) {
+  const before = floorsFor(from);
+  const after = floorsFor(to);
+  const r = Math.min(round, before.length - 1);
+  const cards = Math.min(before[r], after.length / 2);
+  return r < before.length / 2 ? cards - 1 : after.length - cards;
 }
 
-// A side player holds the fan out over the table, angled towards the middle. The two
-// sides are mirror images: Giulia on the left fans to her right, Sofia on the right
-// fans to her left, so the hands never look like copies of each other.
-function sideHand(x: number) {
-  const inward = -x; // +1 for the left seat, -1 for the right
-  return [
-    `translateX(${(inward * 0.7).toFixed(2)}rem)`,
-    "perspective(170px) rotateX(16deg)",
-    `rotateY(${(inward * 48).toFixed(1)}deg)`,
-    `rotate(${(inward * 14).toFixed(1)}deg)`,
-    x > 0.2 ? "scaleX(-1)" : "",
-  ].join(" ");
+// Seat i of n around the table, starting at the front (bottom) and going clockwise.
+function seat(i: number, n: number) {
+  const a = Math.PI / 2 + (i * 2 * Math.PI) / n;
+  return {
+    x: Math.cos(a),
+    y: Math.sin(a),
+    // the hand lies on the felt in front of its player, tops towards the middle
+    turn: (a * 180) / Math.PI - 90,
+  };
 }
 
 export function TableSeats() {
   const { deck } = useDeck();
-  const trick = decks[deck].trick; // each player's card on the felt, from the page's deck
-  const faceUp = [...decks[deck].hand, ...trick]; // the near player's hand, seen from behind
+  const faceUp = [...decks[deck].hand, ...decks[deck].trick]; // the near player's own hand
+  const poker = deck === "poker" ? " table-card--poker" : "";
   const [count, setCount] = useState(4);
   const [round, setRound] = useState(4);
+  const [collecting, setCollecting] = useState(false);
   const [paused, setPaused] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -75,6 +65,7 @@ export function TableSeats() {
   const floors = floorsFor(count);
   const r = Math.min(round, floors.length - 1);
   const cards = floors[r];
+  const running = visible && !paused;
 
   // Ride the elevator on its own while the tile is on screen.
   useEffect(() => {
@@ -88,14 +79,28 @@ export function TableSeats() {
   }, []);
 
   useEffect(() => {
-    if (paused || !visible) return;
+    if (!running) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = window.setInterval(
-      () => setRound((v) => (v + 1) % floorsFor(count).length),
-      ROUND_MS,
-    );
-    return () => window.clearInterval(id);
-  }, [paused, visible, count]);
+    let collect = 0;
+    const id = window.setInterval(() => {
+      setCollecting(true);
+      collect = window.setTimeout(() => {
+        setRound((v) => (v + 1) % floorsFor(count).length);
+        setCollecting(false);
+      }, COLLECT_MS);
+    }, ROUND_MS);
+    return () => {
+      window.clearInterval(id);
+      window.clearTimeout(collect);
+      setCollecting(false);
+    };
+  }, [running, count]);
+
+  const pickCount = (n: number) => {
+    if (n === count) return;
+    setRound(sameFloor(r, count, n));
+    setCount(n);
+  };
 
   return (
     <div
@@ -107,100 +112,65 @@ export function TableSeats() {
         ref={sceneRef}
         className="table-scene"
         data-deck={deck}
+        data-collecting={collecting ? "true" : undefined}
         aria-label={`${count} players, ${cards} cards each`}
         role="img"
       >
         <div className="table-scene__felt" />
+
+        {/* the deck, in the middle: every hand is dealt from here */}
+        <span className={`table-deck card-back${poker}`} aria-hidden="true" />
+
         {players.slice(0, count).map((p, i) => {
           const s = seat(i, count);
-          const t = toss[i];
+          const near = i === 0;
+          // dealt clockwise from the dealer's left, the dealer last
+          const delay = ((i + count - 1) % count) * 90;
+          const spread = Math.min(near ? 8 : 7, (near ? 64 : 56) / cards);
           return (
             <span
-              key={`${p.name}-${deck}`}
-              className={`table-card table-card--played${deck === "poker" ? " table-card--poker" : ""}`}
+              // a fresh hand each round (and when the tile comes into view), dealt from the deck
+              key={`hand-${p.name}-${r}-${count}-${deck}-${visible ? 1 : 0}`}
+              className={`table-hand${near ? " table-hand--near" : ""}`}
+              aria-hidden="true"
               style={{
-                left: `calc(${50 + s.x * 15}% + ${t.dx}rem)`,
-                top: `calc(${50 + s.y * 14}% + ${t.dy}rem)`,
-                backgroundImage: `url(${trick[i]})`,
-                transform: `translate(-50%, -50%) rotate(${t.r}deg)`,
+                left: `${50 + s.x * 26}%`,
+                top: `${50 + s.y * 24}%`,
+                transform: `rotate(${s.turn.toFixed(1)}deg)`,
+                animationDelay: `${delay}ms`,
               }}
-            />
+            >
+              {Array.from({ length: cards }).map((_, c) => (
+                <span
+                  key={c}
+                  className={`table-card${near ? " table-card--face" : " card-back"}${poker}`}
+                  style={{
+                    ["--a" as string]: `${((c - (cards - 1) / 2) * spread).toFixed(2)}deg`,
+                    animationDelay: `${delay + 420}ms`,
+                    backgroundImage: near
+                      ? `url(${faceUp[c % faceUp.length]})`
+                      : undefined,
+                  }}
+                />
+              ))}
+            </span>
           );
         })}
 
-        {/* the deck, by the dealer's seat */}
-        <span className="table-deck card-back" aria-hidden="true" />
-
-        {/* each new round is dealt: one card flies from the deck to every seat */}
-        {visible &&
-          players.slice(0, count).map((p, i) => {
-            const s = seat(i, count);
-            return (
-              <span
-                key={`deal-${r}-${count}-${p.name}`}
-                className={`deal-card card-back${deck === "poker" ? " table-card--poker" : ""}`}
-                aria-hidden="true"
-                style={{
-                  ["--tx" as string]: `${50 + s.x * 40}%`,
-                  ["--ty" as string]: `${50 + s.y * 36}%`,
-                  animationDelay: `${i * 90}ms`,
-                }}
-              />
-            );
-          })}
-
         {players.slice(0, count).map((p, i) => {
           const s = seat(i, count);
-          const scale = 0.9 + s.depth * 0.35;
-          // the near seat has their back to us, so we look over their shoulder at the cards
-          const near = s.y >= 0.9;
-          const spread = Math.min(near ? 11 : 9, (near ? 80 : 60) / cards);
           return (
             <div
               key={p.name}
-              className="pawn"
+              className={`table-seat${s.y < -0.3 ? " table-seat--far" : ""}`}
               style={{
-                left: `${50 + s.x * 43}%`,
+                left: `${50 + s.x * 42}%`,
                 top: `${50 + s.y * 40}%`,
-                zIndex: Math.round(s.depth * 10) + 2,
-                transform: `translate(-50%, -78%) scale(${scale})`,
-                ["--pawn" as string]: p.color,
+                ["--seat" as string]: p.color,
               }}
             >
-              <span className="pawn__head" />
-              <span className="pawn__body" />
-              {/* the hand, held up and fanned towards its owner: side seats turn it in
-                  towards the middle of the table, so we see the backs at an angle */}
-              <span
-                className={`pawn__hand${near ? " pawn__hand--near" : ""}`}
-                aria-hidden="true"
-                style={near ? undefined : { transform: sideHand(s.x) }}
-              >
-                {Array.from({ length: cards }).map((_, c) => {
-                  const angle = (c - (cards - 1) / 2) * spread;
-                  const style = {
-                    transform: `translateX(-50%) rotate(${angle}deg)`,
-                    animationDelay: `${i * 90 + 380}ms`,
-                  };
-                  return near ? (
-                    <span
-                      key={c}
-                      className={`table-card table-card--held table-card--face${deck === "poker" ? " table-card--poker" : ""}`}
-                      style={{
-                        ...style,
-                        backgroundImage: `url(${faceUp[c % faceUp.length]})`,
-                      }}
-                    />
-                  ) : (
-                    <span
-                      key={c}
-                      className="table-card table-card--held card-back"
-                      style={style}
-                    />
-                  );
-                })}
-              </span>
-              <span className="pawn__name">{p.name}</span>
+              <span className="table-seat__chip">{p.name[0]}</span>
+              <span className="table-seat__name">{p.name}</span>
             </div>
           );
         })}
@@ -212,12 +182,11 @@ export function TableSeats() {
           <span className="inline-flex items-center gap-2 font-semibold tabular-nums">
             {/* restarts each round (keyed), so it reads as "next deal in…" */}
             <svg
-              key={`${r}-${count}-${paused || !visible}`} // restart with the interval after a pause
+              key={`${r}-${count}-${running}`} // restart with the interval after a pause
               className="round-timer"
-              data-paused={paused || !visible ? "true" : undefined}
+              data-paused={running ? undefined : "true"}
               viewBox="0 0 20 20"
               aria-hidden="true"
-              style={{ animationDuration: `${ROUND_MS}ms` }}
             >
               <circle cx="10" cy="10" r="8" className="round-timer__track" />
               <circle
@@ -225,7 +194,7 @@ export function TableSeats() {
                 cy="10"
                 r="8"
                 className="round-timer__fill"
-                style={{ animationDuration: `${ROUND_MS}ms` }}
+                style={{ animationDuration: `${ROUND_MS - COLLECT_MS}ms` }}
               />
             </svg>
             Round {r + 1}{" "}
@@ -262,7 +231,7 @@ export function TableSeats() {
               type="button"
               className="seg__btn"
               aria-pressed={count === n}
-              onClick={() => setCount(n)}
+              onClick={() => pickCount(n)}
             >
               {n}
             </button>
