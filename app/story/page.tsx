@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "The story — Elevator Scoreboard",
   description:
-    "How Elevator Scoreboard went from a page on my portfolio site in 2024 to an iPhone app, told by the one person who makes it.",
+    "How Elevator Scoreboard went from a page on my portfolio site in 2024 to an iPhone app.",
 };
 
 // The old web version, still online.
@@ -18,34 +18,72 @@ type Shot = {
   height: number;
 };
 
+// Every image is pre-cropped to its figure's ratio (see .story-figure__shots--*
+// in globals.css): "tall" 4:5, "wide" 16:9, "photos" 4:3.
+type Layout = "tall" | "wide" | "photos";
+
 // Photos from real games. No faces until the people in them have said yes.
-// To add one later: copy it to public/story/ as WebP and add a line here.
+// To add one later: crop it to 4:3, save it to public/story/ as WebP, add a line.
 const tablePhotos: Shot[] = [
   {
     src: "/story/table-candle.webp",
-    alt: "Sicilian playing cards and a candle on a small table at night",
-    width: 720,
-    height: 610,
+    alt: "Sicilian playing cards, a candle and an ashtray on a small table at night",
+    width: 1440,
+    height: 1080,
   },
   {
     src: "/story/table-camping.webp",
-    alt: "Italian playing cards and a phone on a white camping table",
-    width: 1330,
-    height: 680,
+    alt: "A white camping table on a festival field with Italian playing cards, a phone, cans of beer and a mug",
+    width: 1440,
+    height: 1080,
   },
-  // { src: "/story/table-friends.webp", alt: "…", width: 1600, height: 1200 }, // photo 44, needs consent
-  // { src: "/story/table-player.webp", alt: "…", width: 1600, height: 1200 }, // photo 47, needs consent
+  // { src: "/story/table-friends.webp", alt: "…", width: 1440, height: 1080 }, // photo 44, needs consent
+  // { src: "/story/table-player.webp", alt: "…", width: 1440, height: 1080 }, // photo 47, needs consent
+];
+
+// Same people as the credits screen in the app (Settings > Credits).
+const INTRODUCED_BY = "Alessandro and Giacomo";
+const PLAYED_ALONE = "Francesco and Yves";
+const PLAYERS = [
+  "Adriaan",
+  "Alvin",
+  "Charlie",
+  "Delilah",
+  "Edwin",
+  "Ella",
+  "Enzo",
+  "Ethan",
+  "Hayley",
+  "John",
+  "Karen",
+  "Maarten",
+  "Marco",
+  "Mila",
+  "Nathan",
+  "Obrad",
+  "Robin",
+  "Ross",
+  "Ruby",
+  "Sarah",
+  "Tiago",
+  "Tyrone",
+  "Yugi",
+  "Zuzana",
 ];
 
 function Figure({
   shots,
   caption,
-  layout = "single",
+  layout,
 }: {
   shots: Shot[];
   caption: React.ReactNode;
-  layout?: "single" | "pair" | "phone";
+  layout: Layout;
 }) {
+  const sizes =
+    layout === "wide"
+      ? "(min-width: 768px) 640px, 100vw"
+      : "(min-width: 768px) 320px, 50vw";
   return (
     <figure className="story-figure">
       <div className={`story-figure__shots story-figure__shots--${layout}`}>
@@ -56,7 +94,7 @@ function Figure({
             alt={s.alt}
             width={s.width}
             height={s.height}
-            sizes="(min-width: 768px) 640px, 100vw"
+            sizes={sizes}
             className="story-shot"
           />
         ))}
@@ -111,39 +149,40 @@ export default function Story() {
           It started as a web page
         </h1>
         <p className="lede mt-6 max-w-xl">
-          I&rsquo;m Luca, and I make Elevator Scoreboard on my own. It began as
-          a page on my portfolio site so my friends and I could stop adding up
-          scores on paper. This is how it got from there to the App Store.
+          I&rsquo;m Luca, and I make Elevator Scoreboard on my own. My friends
+          and I were tired of adding up scores on paper, so I put a page on my
+          portfolio site to do it for us. This is how that page ended up on the
+          App Store.
         </p>
 
         <ol className="story-timeline">
           <Milestone date="9 August 2024" title="The first game">
             <p>
-              The first version was a single page on my portfolio site. It ran
-              entirely in the browser: no accounts, no server. You typed the
-              names, pressed plus and minus for each call, and locked the round
-              in. We played our first game with it on 9 August 2024.
+              The first version was one page that ran in the browser. No
+              accounts, no server. You typed in the names, tapped plus or minus
+              for each call and locked the round. We played our first game with
+              it on 9 August 2024.
             </p>
             <Figure
-              layout="phone"
+              layout="tall"
               shots={[
                 {
                   src: "/story/web-2024-desktop.webp",
                   alt: "The first web version: round 1 with Alice, Bob, Charlie and Diana, and an empty score table",
                   width: 960,
-                  height: 1140,
+                  height: 1200,
                 },
                 {
                   src: "/story/web-2024-phone.webp",
-                  alt: "An early layout on a phone at lucapulv.com: round 3, with red Lock All and Reset Game buttons",
-                  width: 924,
-                  height: 1600,
+                  alt: "An early phone layout: round 3, with red Lock All and Reset Game buttons and a yellow Start Decrease Early button",
+                  width: 960,
+                  height: 1200,
                 },
               ]}
-              caption="The first version on a laptop, and an early layout on a phone."
+              caption="The first version on a laptop, and an early layout on my phone."
             />
             <p>
-              That page is still online if you want to see where it started:{" "}
+              It&rsquo;s still online if you want to see it:{" "}
               <a
                 href={OLD_WEB_VERSION}
                 className="accent-text underline"
@@ -161,30 +200,31 @@ export default function Story() {
             title="The version we actually played"
           >
             <p>
-              Friends kept using it, so I kept fixing it. Each cell got a
-              colour: red for a missed call, green for a made one, darker the
-              more tricks you called. Below is a real game between Yves, Mila
-              and me, all twenty rounds of it. I came last.
+              Friends kept using it, so I kept fixing it. A cell went red when
+              you missed your call and green when you made it, darker the more
+              tricks you called. This is a real game with Yves and Mila, all
+              twenty rounds of it.
             </p>
             <Figure
-              layout="phone"
+              layout="tall"
               shots={[
                 {
                   src: "/story/table-rounds-1-13.webp",
-                  alt: "Score table for Luca, Yves and Mila, rounds 1 to 13: Luca 180, Yves 240, Mila 290",
-                  width: 786,
-                  height: 1600,
+                  alt: "Score table for Luca, Yves and Mila, rounds 1 to 9, with red and green cells",
+                  width: 960,
+                  height: 1200,
                 },
                 {
                   src: "/story/dev-desk.webp",
                   alt: "A monitor with code in an editor on the left and the web app on the right, showing Round 20, Game Over",
-                  width: 755,
-                  height: 1100,
+                  width: 960,
+                  height: 1200,
                 },
               ]}
-              caption="Halfway through that game, and the web version next to its code on my desk."
+              caption="The start of that game, and the web version next to its code on my desk."
             />
             <Figure
+              layout="wide"
               shots={[
                 {
                   src: "/story/table-rounds-13-20.webp",
@@ -193,32 +233,31 @@ export default function Story() {
                   height: 900,
                 },
               ]}
-              caption="The way back down. Mila won with 390."
+              caption="The way back down. Mila won with 390, Yves had 340 and I came last with 280."
             />
             <p>
-              It went further than I expected. Friends of friends, some of them
-              in other countries, were using it to keep score.
+              Then friends of friends started using it, some of them in other
+              countries. I didn&rsquo;t see that coming.
             </p>
             <Figure
-              layout="pair"
+              layout="photos"
               shots={tablePhotos}
-              caption={"Two of the tables it was played at."}
+              caption="Two of the tables it got played at."
             />
           </Milestone>
 
           <Milestone date="26 September 2025" title="Starting the iPhone app">
             <p>
-              On 26 September 2025 I started building Elevator Scoreboard as a
-              proper iPhone app. I&rsquo;ve been working on it for a long time
-              since.
+              On 26 September 2025 I started building it again as a proper
+              iPhone app. I&rsquo;ve been working on it ever since.
             </p>
           </Milestone>
 
           <Milestone date="Now" title="On the App Store">
             <p>
-              I finally bought an Apple developer licence and released it.
-              Scoring, match history and stats are free for everyone. Pro is an
-              optional one-time purchase.
+              I finally paid for an Apple developer account and put it out.
+              Scoring, match history and stats are free. Pro is an optional
+              one-time purchase.
             </p>
           </Milestone>
         </ol>
@@ -229,31 +268,44 @@ export default function Story() {
           </h2>
           <div className="mt-4 space-y-4 leading-7 text-[var(--text-2)]">
             <p>
-              Elevator Scoreboard mostly runs on your phone. I added Pro anyway,
-              because this app has taken a large part of my time.
+              The app mostly runs on your phone. I added Pro anyway, because
+              it&rsquo;s taken up a big part of my time.
             </p>
             <p>
-              Pro unlocks 5 and 6 player games, the live game on every
-              player&rsquo;s phone with a room code, and the scores on the Lock
-              Screen while you play. It&rsquo;s a one-time purchase, no
+              Pro gets you 5 and 6 player games, the live game on
+              everyone&rsquo;s phone with a room code, and the scores on your
+              Lock Screen while you play. You pay once. There&rsquo;s no
               subscription.
             </p>
             <p>
-              I don&rsquo;t expect it to make much money, and that&rsquo;s fine.
-              It&rsquo;s a passion project. It let me show people how much I
-              like programming, and it made the game easier to play. Seeing
-              other people enjoy Elevator has been the best part. If you buy
-              Pro, thank you. It helps me keep working on it.
+              I don&rsquo;t expect it to make much money, and I&rsquo;m fine
+              with that. It&rsquo;s a passion project, and a way to show how
+              much I like programming. Seeing people enjoy the game is the best
+              part. If you buy Pro, thank you. It helps me keep working on it.
             </p>
           </div>
         </section>
 
         <section className="mt-16">
           <h2 className="display text-2xl sm:text-3xl">Thank you</h2>
-          <p className="mt-4 leading-7 text-[var(--text-2)]">
-            To everyone who played the early versions, found the bugs and sat
-            through one more test game.
-          </p>
+          <div className="mt-4 space-y-4 leading-7 text-[var(--text-2)]">
+            <p>
+              <span className="text-[var(--text)]">{INTRODUCED_BY}</span>, for
+              showing me Ascensore (Elevator) in the first place.
+            </p>
+            <p>
+              <span className="text-[var(--text)]">{PLAYED_ALONE}</span>, for
+              using the scoreboard on your own, even when I wasn&rsquo;t there.
+            </p>
+            <p>And everyone else who sat at the table with it:</p>
+          </div>
+          <ul className="story-names" aria-label="Players">
+            {PLAYERS.map((name) => (
+              <li key={name} className="story-name">
+                {name}
+              </li>
+            ))}
+          </ul>
         </section>
 
         <div className="mt-16 flex flex-wrap items-center gap-x-6 gap-y-4">
