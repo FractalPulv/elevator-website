@@ -78,7 +78,7 @@ export default function PrivacyPolicy() {
           </p>
           <p>
             <strong className="text-[var(--text)]">Your choice.</strong> You can turn off usage analytics and
-            session recordings at any time in the app under Settings &rsaquo; Privacy &rsaquo; Share usage data.
+            session recordings at any time in the app under Settings &rsaquo; About &rsaquo; Share usage data.
           </p>
           <p>
             <strong className="text-[var(--text)]">Performance measurements.</strong> The app measures how
